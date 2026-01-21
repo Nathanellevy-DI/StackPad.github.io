@@ -3,6 +3,7 @@ import themeReducer from './slices/themeSlice';
 import commandsReducer from './slices/commandsSlice';
 import userReducer from './slices/userSlice';
 import workspaceReducer from './slices/workspaceSlice';
+import musicReducer from './slices/musicSlice';
 
 export const store = configureStore({
     reducer: {
@@ -10,6 +11,7 @@ export const store = configureStore({
         commands: commandsReducer,
         user: userReducer,
         workspace: workspaceReducer,
+        music: musicReducer,
     },
 });
 

@@ -6,6 +6,7 @@ import store from './redux/store';
 import Header from './components/layout/Header';
 import Sidebar from './components/layout/Sidebar';
 import MobileNav from './components/layout/MobileNav';
+import MiniPlayer from './components/MusicPlayer/MiniPlayer';
 
 // Feature components
 import CommandSearch from './components/CommandVault/CommandSearch';
@@ -90,6 +91,9 @@ function Dashboard() {
           {renderContent()}
         </main>
       </div>
+
+      {/* Persistent Music Mini-Player */}
+      <MiniPlayer />
 
       <MobileNav
         activeSection={activeSection}

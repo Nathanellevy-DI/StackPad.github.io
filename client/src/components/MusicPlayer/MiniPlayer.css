@@ -1,0 +1,106 @@
+.mini-player {
+    position: fixed;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100% - 32px);
+    max-width: 500px;
+    z-index: 500;
+    padding: 0;
+    overflow: hidden;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
+}
+
+@media (min-width: 768px) {
+    .mini-player {
+        bottom: 20px;
+        left: auto;
+        right: 20px;
+        transform: none;
+        width: 380px;
+    }
+}
+
+.mini-player-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.mini-player-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+    min-width: 0;
+}
+
+.mini-now-playing {
+    font-size: 0.625rem;
+    color: var(--accent-green);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.mini-song-title {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.mini-track-info {
+    font-size: 0.625rem;
+    color: var(--text-muted);
+}
+
+.mini-player-controls {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+}
+
+.mini-control-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    font-size: 0.75rem;
+}
+
+.mini-control-btn:hover:not(:disabled) {
+    background: var(--accent-primary);
+    color: var(--bg-primary);
+}
+
+.mini-control-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.mini-control-btn.stop {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+}
+
+.mini-control-btn.stop:hover {
+    background: #ef4444;
+    color: white;
+}
+
+.mini-player-embed {
+    height: 80px;
+    overflow: hidden;
+}
+
+.mini-player-embed iframe {
+    display: block;
+}
