@@ -1,82 +1,52 @@
 import { useState, useEffect } from 'react';
 import './MusicPlayer.css';
 
-// Curated playlists
-const SPOTIFY_PLAYLISTS = [
-    { id: '0vvXsWCC9xrXsKd4FyS8kM', label: 'Deep Focus', icon: '🧠', category: 'Focus' },
-    { id: '37i9dQZF1DWZeKCadgRdKQ', label: 'Lo-Fi Beats', icon: '🎵', category: 'Lofi' },
-    { id: '37i9dQZF1DX5trt9i14X7j', label: 'Coding Mode', icon: '💻', category: 'Focus' },
-    { id: '37i9dQZF1DWWQRwui0ExPn', label: 'Chill Lofi', icon: '☕', category: 'Lofi' },
-];
-
-const APPLE_PLAYLISTS = [
-    { id: 'pl.9722dd0c7e8b4746b9e2ec5e7b7c7a0a', label: 'Pure Focus', icon: '🎯', category: 'Focus' },
-    { id: 'pl.3f29e145a1ee42b19be6dd6d0bbb0c70', label: 'Lo-Fi Chill', icon: '🌙', category: 'Lofi' },
-];
-
-const YOUTUBE_STREAMS = [
-    { id: 'jfKfPfyJRdk', label: 'Lofi Hip Hop Radio', icon: '📻', category: 'Lofi' },
-    { id: '5qap5aO4i9A', label: 'Chillhop Radio', icon: '🎧', category: 'Lofi' },
+// Example starting playlists (various genres)
+const STARTER_PLAYLISTS = [
+    { id: 'jfKfPfyJRdk', label: 'Lofi Hip Hop Radio', icon: '🎧', category: 'Lofi' },
     { id: 'DWcJFNfaw9c', label: 'Jazz & Coffee', icon: '☕', category: 'Jazz' },
-];
-
-const SERVICES = [
-    { id: 'spotify', label: 'Spotify', icon: '🟢' },
-    { id: 'apple', label: 'Apple Music', icon: '🍎' },
-    { id: 'youtube', label: 'YouTube', icon: '🔴' },
-    { id: 'myplaylist', label: 'My Playlist', icon: '❤️' },
+    { id: 'Na0w3Mz46GA', label: 'Synthwave Radio', icon: '🌆', category: 'Electronic' },
+    { id: 'hHW1oY26kxQ', label: 'Classical Focus', icon: '🎻', category: 'Classical' },
+    { id: '36YnV9STBqc', label: 'Pop Hits Mix', icon: '🎤', category: 'Pop' },
+    { id: 'Dx5qFachd3A', label: 'Rock Classics', icon: '🎸', category: 'Rock' },
 ];
 
 export default function MusicPlayer() {
-    const [service, setService] = useState(() => {
-        return localStorage.getItem('stackpad-music-service') || 'youtube';
-    });
-    const [selectedPlaylist, setSelectedPlaylist] = useState(null);
-    const [youtubeUrl, setYoutubeUrl] = useState('');
-    const [customVideoId, setCustomVideoId] = useState('');
-    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [currentVideo, setCurrentVideo] = useState(null);
 
-    // Custom playlist state
+    // Custom playlist (saved songs)
     const [myPlaylist, setMyPlaylist] = useState(() => {
         const stored = localStorage.getItem('stackpad-my-playlist');
         return stored ? JSON.parse(stored) : [];
     });
+    const [newSongUrl, setNewSongUrl] = useState('');
     const [newSongTitle, setNewSongTitle] = useState('');
     const [currentPlaylistIndex, setCurrentPlaylistIndex] = useState(0);
+    const [showAddForm, setShowAddForm] = useState(false);
 
     // Save custom playlist
     useEffect(() => {
         localStorage.setItem('stackpad-my-playlist', JSON.stringify(myPlaylist));
     }, [myPlaylist]);
 
-    // Save service preference
-    useEffect(() => {
-        localStorage.setItem('stackpad-music-service', service);
-        setSelectedPlaylist(null);
-        setCustomVideoId('');
-    }, [service]);
-
-    const currentService = SERVICES.find(s => s.id === service);
-
-    const getPlaylists = () => {
-        switch (service) {
-            case 'spotify': return SPOTIFY_PLAYLISTS;
-            case 'apple': return APPLE_PLAYLISTS;
-            case 'youtube': return YOUTUBE_STREAMS;
-            default: return [];
-        }
-    };
-
     const extractYouTubeId = (url) => {
         const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\s]+)/);
         return match ? match[1] : null;
     };
 
-    const addToMyPlaylist = (e) => {
+    const handleSearch = (e) => {
         e.preventDefault();
-        if (!youtubeUrl.trim()) return;
+        if (!searchQuery.trim()) return;
+        // Open YouTube search in new tab - user can find and copy URL
+        window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(searchQuery + ' music')}`, '_blank');
+    };
 
-        const videoId = extractYouTubeId(youtubeUrl);
+    const addToPlaylist = (e) => {
+        e.preventDefault();
+        if (!newSongUrl.trim()) return;
+
+        const videoId = extractYouTubeId(newSongUrl);
         if (videoId) {
             const newSong = {
                 id: videoId,
@@ -84,8 +54,11 @@ export default function MusicPlayer() {
                 addedAt: new Date().toISOString(),
             };
             setMyPlaylist([...myPlaylist, newSong]);
-            setYoutubeUrl('');
+            setNewSongUrl('');
             setNewSongTitle('');
+            setShowAddForm(false);
+            // Auto-play newly added song
+            setCurrentVideo(newSong);
         } else {
             alert('Please enter a valid YouTube URL');
         }
@@ -93,89 +66,34 @@ export default function MusicPlayer() {
 
     const removeFromPlaylist = (videoId) => {
         setMyPlaylist(myPlaylist.filter(song => song.id !== videoId));
+        if (currentVideo?.id === videoId) {
+            setCurrentVideo(null);
+        }
     };
 
-    const playFromPlaylist = (index) => {
+    const playFromPlaylist = (song, index) => {
+        setCurrentVideo(song);
         setCurrentPlaylistIndex(index);
-        setCustomVideoId(myPlaylist[index].id);
     };
 
     const playNext = () => {
         if (currentPlaylistIndex < myPlaylist.length - 1) {
-            playFromPlaylist(currentPlaylistIndex + 1);
+            const nextIndex = currentPlaylistIndex + 1;
+            setCurrentPlaylistIndex(nextIndex);
+            setCurrentVideo(myPlaylist[nextIndex]);
         }
     };
 
     const playPrev = () => {
         if (currentPlaylistIndex > 0) {
-            playFromPlaylist(currentPlaylistIndex - 1);
+            const prevIndex = currentPlaylistIndex - 1;
+            setCurrentPlaylistIndex(prevIndex);
+            setCurrentVideo(myPlaylist[prevIndex]);
         }
     };
 
-    const renderPlayer = () => {
-        if (!selectedPlaylist && !customVideoId) {
-            return (
-                <div className="player-placeholder">
-                    <span className="placeholder-icon">🎵</span>
-                    <p>Select a playlist or add songs to your playlist</p>
-                </div>
-            );
-        }
-
-        if (customVideoId || service === 'myplaylist') {
-            return (
-                <iframe
-                    src={`https://www.youtube.com/embed/${customVideoId || myPlaylist[currentPlaylistIndex]?.id}?autoplay=0`}
-                    width="100%"
-                    height="350"
-                    frameBorder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                    title="YouTube Player"
-                />
-            );
-        }
-
-        switch (service) {
-            case 'spotify':
-                return (
-                    <iframe
-                        src={`https://open.spotify.com/embed/playlist/${selectedPlaylist.id}?utm_source=generator&theme=0`}
-                        width="100%"
-                        height="350"
-                        frameBorder="0"
-                        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-                        loading="lazy"
-                        title={selectedPlaylist.label}
-                    />
-                );
-            case 'apple':
-                return (
-                    <iframe
-                        src={`https://embed.music.apple.com/us/playlist/${selectedPlaylist.id}?app=music`}
-                        width="100%"
-                        height="350"
-                        frameBorder="0"
-                        allow="autoplay *; encrypted-media *; fullscreen *"
-                        sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-top-navigation-by-user-activation"
-                        title={selectedPlaylist.label}
-                    />
-                );
-            case 'youtube':
-                return (
-                    <iframe
-                        src={`https://www.youtube.com/embed/${selectedPlaylist.id}?autoplay=0`}
-                        width="100%"
-                        height="350"
-                        frameBorder="0"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowFullScreen
-                        title={selectedPlaylist.label}
-                    />
-                );
-            default:
-                return null;
-        }
+    const playStarterPlaylist = (playlist) => {
+        setCurrentVideo(playlist);
     };
 
     return (
@@ -186,67 +104,100 @@ export default function MusicPlayer() {
                         <span className="title-icon">🎵</span>
                         Music Player
                     </h2>
-                    <p className="music-subtitle">Focus with your favorite tunes</p>
-                </div>
-
-                {/* Service Dropdown */}
-                <div className="service-dropdown">
-                    <button
-                        className="dropdown-trigger glass-button"
-                        onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                    >
-                        <span>{currentService?.icon}</span>
-                        <span>{currentService?.label}</span>
-                        <span className="dropdown-arrow">{isDropdownOpen ? '▲' : '▼'}</span>
-                    </button>
-
-                    {isDropdownOpen && (
-                        <div className="dropdown-menu glass-card">
-                            {SERVICES.map((s) => (
-                                <button
-                                    key={s.id}
-                                    className={`dropdown-item ${service === s.id ? 'active' : ''}`}
-                                    onClick={() => {
-                                        setService(s.id);
-                                        setIsDropdownOpen(false);
-                                    }}
-                                >
-                                    <span>{s.icon}</span>
-                                    <span>{s.label}</span>
-                                    {s.id === 'myplaylist' && myPlaylist.length > 0 && (
-                                        <span className="playlist-count">{myPlaylist.length}</span>
-                                    )}
-                                </button>
-                            ))}
-                        </div>
-                    )}
+                    <p className="music-subtitle">Search for any song or build your playlist</p>
                 </div>
             </div>
 
-            {/* My Playlist Builder */}
-            {service === 'myplaylist' && (
-                <div className="my-playlist-section">
-                    <form className="add-song-form" onSubmit={addToMyPlaylist}>
-                        <input
-                            type="text"
-                            className="glass-input"
-                            placeholder="Paste YouTube URL..."
-                            value={youtubeUrl}
-                            onChange={(e) => setYoutubeUrl(e.target.value)}
-                        />
-                        <input
-                            type="text"
-                            className="glass-input song-title-input"
-                            placeholder="Song title (optional)"
-                            value={newSongTitle}
-                            onChange={(e) => setNewSongTitle(e.target.value)}
-                        />
-                        <button type="submit" className="glass-button primary">
-                            + Add
-                        </button>
-                    </form>
+            {/* Search Section */}
+            <div className="search-section glass-card">
+                <h3 className="section-label">🔍 Search for Music</h3>
+                <form className="search-form" onSubmit={handleSearch}>
+                    <input
+                        type="text"
+                        className="glass-input search-input"
+                        placeholder="Search for any song, artist, or genre..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                    <button type="submit" className="glass-button primary">
+                        Search YouTube
+                    </button>
+                </form>
+                <p className="search-hint">Find a song, then copy its URL and add it to your playlist below!</p>
+            </div>
 
-                    {myPlaylist.length > 0 && (
+            <div className="music-content">
+                {/* My Playlist Section */}
+                <div className="playlist-section">
+                    <div className="playlist-header">
+                        <h3 className="section-title">❤️ My Playlist ({myPlaylist.length})</h3>
+                        <button
+                            className="glass-button small"
+                            onClick={() => setShowAddForm(!showAddForm)}
+                        >
+                            {showAddForm ? '✕ Cancel' : '+ Add Song'}
+                        </button>
+                    </div>
+
+                    {/* Add Song Form */}
+                    {showAddForm && (
+                        <form className="add-song-form" onSubmit={addToPlaylist}>
+                            <input
+                                type="text"
+                                className="glass-input"
+                                placeholder="Paste YouTube URL here..."
+                                value={newSongUrl}
+                                onChange={(e) => setNewSongUrl(e.target.value)}
+                            />
+                            <input
+                                type="text"
+                                className="glass-input"
+                                placeholder="Song name (optional)"
+                                value={newSongTitle}
+                                onChange={(e) => setNewSongTitle(e.target.value)}
+                            />
+                            <button type="submit" className="glass-button primary">
+                                Add to Playlist
+                            </button>
+                        </form>
+                    )}
+
+                    {/* Playlist Songs */}
+                    <div className="playlist-songs">
+                        {myPlaylist.length > 0 ? (
+                            myPlaylist.map((song, index) => (
+                                <div
+                                    key={song.id + index}
+                                    className={`song-item ${currentVideo?.id === song.id ? 'playing' : ''}`}
+                                >
+                                    <button
+                                        className="song-play-btn"
+                                        onClick={() => playFromPlaylist(song, index)}
+                                    >
+                                        {currentVideo?.id === song.id ? '▶' : '○'}
+                                    </button>
+                                    <span className="song-title" onClick={() => playFromPlaylist(song, index)}>
+                                        {song.title}
+                                    </span>
+                                    <button
+                                        className="song-remove-btn"
+                                        onClick={() => removeFromPlaylist(song.id)}
+                                        title="Remove"
+                                    >
+                                        ✕
+                                    </button>
+                                </div>
+                            ))
+                        ) : (
+                            <div className="empty-playlist">
+                                <p>Your playlist is empty</p>
+                                <p className="hint">Search for songs above and add them here!</p>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Playlist Controls */}
+                    {myPlaylist.length > 1 && currentVideo && (
                         <div className="playlist-controls">
                             <button
                                 className="control-btn"
@@ -267,90 +218,51 @@ export default function MusicPlayer() {
                             </button>
                         </div>
                     )}
-                </div>
-            )}
 
-            <div className="music-content">
-                {/* Playlist Grid (for curated playlists) */}
-                {service !== 'myplaylist' && (
-                    <div className="playlist-section">
-                        <h3 className="section-title">
-                            {service === 'youtube' ? 'Live Streams' : 'Curated Playlists'}
-                        </h3>
-                        <div className="playlist-grid">
-                            {getPlaylists().map((playlist) => (
+                    {/* Quick Start Playlists */}
+                    <div className="quick-start">
+                        <h4 className="quick-label">Quick Start (Live Streams)</h4>
+                        <div className="quick-grid">
+                            {STARTER_PLAYLISTS.map((playlist) => (
                                 <button
                                     key={playlist.id}
-                                    className={`playlist-card ${selectedPlaylist?.id === playlist.id ? 'active' : ''}`}
-                                    onClick={() => { setSelectedPlaylist(playlist); setCustomVideoId(''); }}
+                                    className={`quick-btn ${currentVideo?.id === playlist.id ? 'active' : ''}`}
+                                    onClick={() => playStarterPlaylist(playlist)}
                                 >
-                                    <span className="playlist-icon">{playlist.icon}</span>
-                                    <div className="playlist-info">
-                                        <span className="playlist-name">{playlist.label}</span>
-                                        <span className="playlist-category">{playlist.category}</span>
-                                    </div>
+                                    <span>{playlist.icon}</span>
+                                    <span>{playlist.label}</span>
                                 </button>
                             ))}
                         </div>
                     </div>
-                )}
+                </div>
 
-                {/* My Playlist Songs */}
-                {service === 'myplaylist' && (
-                    <div className="playlist-section">
-                        <h3 className="section-title">My Songs ({myPlaylist.length})</h3>
-                        <div className="playlist-grid">
-                            {myPlaylist.length > 0 ? (
-                                myPlaylist.map((song, index) => (
-                                    <div
-                                        key={song.id}
-                                        className={`playlist-card my-song ${customVideoId === song.id ? 'active' : ''}`}
-                                    >
-                                        <button
-                                            className="song-play-btn"
-                                            onClick={() => playFromPlaylist(index)}
-                                        >
-                                            ▶
-                                        </button>
-                                        <div className="playlist-info" onClick={() => playFromPlaylist(index)}>
-                                            <span className="playlist-name">{song.title}</span>
-                                            <span className="playlist-category">YouTube</span>
-                                        </div>
-                                        <button
-                                            className="song-remove-btn"
-                                            onClick={() => removeFromPlaylist(song.id)}
-                                        >
-                                            ✕
-                                        </button>
-                                    </div>
-                                ))
-                            ) : (
-                                <div className="empty-playlist">
-                                    <p>Your playlist is empty!</p>
-                                    <p className="hint">Paste a YouTube URL above to add songs</p>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                )}
-
-                {/* Player */}
+                {/* Player Section */}
                 <div className="player-section glass-card">
-                    <div className="now-playing">
-                        {(selectedPlaylist || customVideoId) && (
-                            <>
+                    {currentVideo ? (
+                        <>
+                            <div className="now-playing">
                                 <span className="now-playing-icon">▶</span>
-                                <span>Now Playing: {
-                                    service === 'myplaylist' && myPlaylist[currentPlaylistIndex]
-                                        ? myPlaylist[currentPlaylistIndex].title
-                                        : selectedPlaylist?.label || 'Custom Video'
-                                }</span>
-                            </>
-                        )}
-                    </div>
-                    <div className="player-embed">
-                        {renderPlayer()}
-                    </div>
+                                <span>Now Playing: {currentVideo.title || currentVideo.label}</span>
+                            </div>
+                            <div className="player-embed">
+                                <iframe
+                                    src={`https://www.youtube.com/embed/${currentVideo.id}?autoplay=0`}
+                                    width="100%"
+                                    height="400"
+                                    frameBorder="0"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    allowFullScreen
+                                    title="YouTube Player"
+                                />
+                            </div>
+                        </>
+                    ) : (
+                        <div className="player-placeholder">
+                            <span className="placeholder-icon">🎵</span>
+                            <p>Search for a song or select from quick start to begin!</p>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>
