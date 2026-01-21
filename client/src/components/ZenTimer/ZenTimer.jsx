@@ -7,17 +7,18 @@ const PRESET_MODES = {
     longBreak: { label: 'Long Break', duration: 15, color: 'var(--accent-cyan)' },
 };
 
-const AMBIENT_SOUNDS = [
-    { id: 'none', label: 'None', icon: '🔇', url: null },
-    { id: 'rain', label: 'Rain', icon: '🌧️', url: 'https://assets.mixkit.co/active_storage/sfx/212/212-preview.mp3' },
-    { id: 'forest', label: 'Forest', icon: '🌲', url: 'https://assets.mixkit.co/active_storage/sfx/217/217-preview.mp3' },
-    { id: 'waves', label: 'Waves', icon: '🌊', url: 'https://assets.mixkit.co/active_storage/sfx/2432/2432-preview.mp3' },
+// Curated Spotify playlists for focus/work
+const SPOTIFY_PLAYLISTS = [
+    { id: '0vvXsWCC9xrXsKd4FyS8kM', label: 'Deep Focus', icon: '🧠' },
+    { id: '37i9dQZF1DWZeKCadgRdKQ', label: 'Lo-Fi Beats', icon: '🎵' },
+    { id: '37i9dQZF1DX5trt9i14X7j', label: 'Coding Mode', icon: '💻' },
+    { id: '37i9dQZF1DWWQRwui0ExPn', label: 'Chill Lofi', icon: '☕' },
 ];
 
-// Free lofi YouTube streams (embedded)
-const LOFI_STREAMS = [
-    { id: 'lofi1', label: 'Lofi Hip Hop', icon: '🎵', videoId: 'jfKfPfyJRdk' },
-    { id: 'lofi2', label: 'Chillhop', icon: '🎶', videoId: '5qap5aO4i9A' },
+// Apple Music playlists (using embed)
+const APPLE_PLAYLISTS = [
+    { id: 'pl.9722dd0c7e8b4746b9e2ec5e7b7c7a0a', label: 'Pure Focus', icon: '🎯' },
+    { id: 'pl.3f29e145a1ee42b19be6dd6d0bbb0c70', label: 'Lo-Fi Chill', icon: '🌙' },
 ];
 
 export default function ZenTimer() {
@@ -27,13 +28,11 @@ export default function ZenTimer() {
     const [timeLeft, setTimeLeft] = useState(25 * 60);
     const [isRunning, setIsRunning] = useState(false);
     const [sessions, setSessions] = useState(0);
-    const [activeSound, setActiveSound] = useState('none');
-    const [showLofi, setShowLofi] = useState(false);
-    const [selectedLofi, setSelectedLofi] = useState(null);
-    const [volume, setVolume] = useState(50);
+    const [showMusic, setShowMusic] = useState(false);
+    const [musicService, setMusicService] = useState('spotify');
+    const [selectedPlaylist, setSelectedPlaylist] = useState(null);
 
     const intervalRef = useRef(null);
-    const audioRef = useRef(null);
 
     const currentDuration = isCustomMode ? customMinutes * 60 : PRESET_MODES[mode].duration * 60;
     const progress = ((currentDuration - timeLeft) / currentDuration) * 100;
@@ -74,41 +73,6 @@ export default function ZenTimer() {
         setIsRunning(false);
     };
 
-    // Handle ambient sounds
-    useEffect(() => {
-        if (activeSound === 'none') {
-            if (audioRef.current) {
-                audioRef.current.pause();
-                audioRef.current = null;
-            }
-            return;
-        }
-
-        const sound = AMBIENT_SOUNDS.find(s => s.id === activeSound);
-        if (sound?.url) {
-            if (audioRef.current) {
-                audioRef.current.pause();
-            }
-            audioRef.current = new Audio(sound.url);
-            audioRef.current.loop = true;
-            audioRef.current.volume = volume / 100;
-            audioRef.current.play().catch(console.log);
-        }
-
-        return () => {
-            if (audioRef.current) {
-                audioRef.current.pause();
-            }
-        };
-    }, [activeSound]);
-
-    // Update volume
-    useEffect(() => {
-        if (audioRef.current) {
-            audioRef.current.volume = volume / 100;
-        }
-    }, [volume]);
-
     // Timer logic
     useEffect(() => {
         if (isRunning && timeLeft > 0) {
@@ -137,12 +101,14 @@ export default function ZenTimer() {
     const circumference = 2 * Math.PI * 120;
     const strokeDashoffset = circumference - (progress / 100) * circumference;
 
+    const currentPlaylists = musicService === 'spotify' ? SPOTIFY_PLAYLISTS : APPLE_PLAYLISTS;
+
     return (
         <div className="zen-timer">
             <div className="timer-header">
                 <h2 className="timer-title">
                     <span className="title-icon">🧘</span>
-                    Zen Timer & Ambient Player
+                    Zen Timer
                 </h2>
                 <div className="session-count">
                     <span className="session-icon">🎯</span>
@@ -226,72 +192,76 @@ export default function ZenTimer() {
                     </button>
                 </div>
 
-                {/* Ambient Sounds */}
-                <div className="ambient-section">
-                    <h3 className="ambient-title">Ambient Sounds</h3>
-                    <div className="ambient-grid">
-                        {AMBIENT_SOUNDS.map((sound) => (
-                            <button
-                                key={sound.id}
-                                className={`ambient-btn ${activeSound === sound.id ? 'active' : ''}`}
-                                onClick={() => setActiveSound(sound.id)}
-                            >
-                                <span className="ambient-icon">{sound.icon}</span>
-                                <span className="ambient-label">{sound.label}</span>
-                            </button>
-                        ))}
-                    </div>
-
-                    {activeSound !== 'none' && (
-                        <div className="volume-control">
-                            <span>🔊</span>
-                            <input
-                                type="range"
-                                min="0"
-                                max="100"
-                                value={volume}
-                                onChange={(e) => setVolume(e.target.value)}
-                                className="volume-slider"
-                            />
-                            <span>{volume}%</span>
-                        </div>
-                    )}
-                </div>
-
-                {/* Lofi Music */}
-                <div className="lofi-section">
+                {/* Music Integration */}
+                <div className="music-section">
                     <button
-                        className="lofi-toggle glass-button"
-                        onClick={() => setShowLofi(!showLofi)}
+                        className="music-toggle glass-button"
+                        onClick={() => setShowMusic(!showMusic)}
                     >
-                        🎵 {showLofi ? 'Hide' : 'Show'} Lofi Player
+                        🎵 {showMusic ? 'Hide' : 'Show'} Music Player
                     </button>
 
-                    {showLofi && (
-                        <div className="lofi-player">
-                            <div className="lofi-options">
-                                {LOFI_STREAMS.map((stream) => (
+                    {showMusic && (
+                        <div className="music-player">
+                            {/* Service Tabs */}
+                            <div className="music-service-tabs">
+                                <button
+                                    className={`service-tab ${musicService === 'spotify' ? 'active' : ''}`}
+                                    onClick={() => { setMusicService('spotify'); setSelectedPlaylist(null); }}
+                                >
+                                    <span className="service-icon">🟢</span> Spotify
+                                </button>
+                                <button
+                                    className={`service-tab ${musicService === 'apple' ? 'active' : ''}`}
+                                    onClick={() => { setMusicService('apple'); setSelectedPlaylist(null); }}
+                                >
+                                    <span className="service-icon">🍎</span> Apple Music
+                                </button>
+                            </div>
+
+                            {/* Playlist Options */}
+                            <div className="playlist-grid">
+                                {currentPlaylists.map((playlist) => (
                                     <button
-                                        key={stream.id}
-                                        className={`lofi-btn ${selectedLofi?.id === stream.id ? 'active' : ''}`}
-                                        onClick={() => setSelectedLofi(stream)}
+                                        key={playlist.id}
+                                        className={`playlist-btn ${selectedPlaylist?.id === playlist.id ? 'active' : ''}`}
+                                        onClick={() => setSelectedPlaylist(playlist)}
                                     >
-                                        <span>{stream.icon}</span>
-                                        <span>{stream.label}</span>
+                                        <span>{playlist.icon}</span>
+                                        <span>{playlist.label}</span>
                                     </button>
                                 ))}
                             </div>
-                            {selectedLofi && (
-                                <div className="lofi-embed">
-                                    <iframe
-                                        width="100%"
-                                        height="80"
-                                        src={`https://www.youtube.com/embed/${selectedLofi.videoId}?autoplay=0`}
-                                        title={selectedLofi.label}
-                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                        allowFullScreen
-                                    />
+
+                            {/* Embedded Player */}
+                            {selectedPlaylist && (
+                                <div className="music-embed">
+                                    {musicService === 'spotify' ? (
+                                        <iframe
+                                            src={`https://open.spotify.com/embed/playlist/${selectedPlaylist.id}?utm_source=generator&theme=0`}
+                                            width="100%"
+                                            height="152"
+                                            frameBorder="0"
+                                            allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                                            loading="lazy"
+                                            title={selectedPlaylist.label}
+                                        />
+                                    ) : (
+                                        <iframe
+                                            src={`https://embed.music.apple.com/us/playlist/${selectedPlaylist.id}`}
+                                            width="100%"
+                                            height="175"
+                                            frameBorder="0"
+                                            allow="autoplay *; encrypted-media *; fullscreen *"
+                                            sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-top-navigation-by-user-activation"
+                                            title={selectedPlaylist.label}
+                                        />
+                                    )}
                                 </div>
+                            )}
+
+                            {!selectedPlaylist && (
+                                <p className="music-hint">Select a playlist above to start playing</p>
                             )}
                         </div>
                     )}
