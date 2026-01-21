@@ -1,13 +1,45 @@
+import { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { toggleTheme } from '../../redux/slices/themeSlice';
 import { toggleProfileModal } from '../../redux/slices/userSlice';
 import WorkspaceSwitcher from '../WorkspaceSwitcher/WorkspaceSwitcher';
 import './Header.css';
 
+const MOTIVATIONAL_MESSAGES = [
+    { text: "You're doing great! Keep it up! 💪", icon: "🚀" },
+    { text: "💧 Remember to drink some water!", icon: "💧" },
+    { text: "Small progress is still progress! ✨", icon: "✨" },
+    { text: "Take a deep breath. You've got this! 🧘", icon: "🧘" },
+    { text: "💧 Hydration check - grab some water!", icon: "💧" },
+    { text: "One step at a time. You're making progress! 👣", icon: "👣" },
+    { text: "Great things take time. Stay focused! 🎯", icon: "🎯" },
+    { text: "💧 Time for a water break!", icon: "💧" },
+    { text: "Believe in yourself! You're capable of amazing things! 🌟", icon: "🌟" },
+    { text: "Remember: breaks boost productivity! ☕", icon: "☕" },
+    { text: "💧 Your brain needs water to function! 🧠", icon: "💧" },
+    { text: "Every line of code matters! 💻", icon: "💻" },
+    { text: "You're building something awesome! 🏗️", icon: "🏗️" },
+    { text: "💧 Quick water break? Stay hydrated! 💧", icon: "💧" },
+    { text: "Keep crushing it! You're a rockstar! 🎸", icon: "🎸" },
+    { text: "Stretch those muscles! 🤸", icon: "🤸" },
+    { text: "Your dedication is inspiring! 💎", icon: "💎" },
+];
+
 export default function Header() {
     const dispatch = useDispatch();
     const { mode } = useSelector((state) => state.theme);
     const { user } = useSelector((state) => state.user);
+    const [messageIndex, setMessageIndex] = useState(0);
+
+    // Rotate messages every 30 seconds
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setMessageIndex((prev) => (prev + 1) % MOTIVATIONAL_MESSAGES.length);
+        }, 30000);
+        return () => clearInterval(interval);
+    }, []);
+
+    const currentMessage = MOTIVATIONAL_MESSAGES[messageIndex];
 
     return (
         <header className="header glass-card">
@@ -20,7 +52,9 @@ export default function Header() {
             </div>
 
             <div className="header-center">
-                <span className="greeting">Hello, {user.name}!</span>
+                <div className="motivation-banner">
+                    <span className="motivation-text">{currentMessage.text}</span>
+                </div>
             </div>
 
             <div className="header-right">
