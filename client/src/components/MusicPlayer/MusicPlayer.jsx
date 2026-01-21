@@ -5,10 +5,10 @@ import './MusicPlayer.css';
 
 // Quick start streams
 const STARTER_STREAMS = [
-    { id: 'jfKfPfyJRdk', title: 'Lofi Hip Hop Radio', icon: '🎧' },
-    { id: 'DWcJFNfaw9c', title: 'Jazz & Coffee', icon: '☕' },
-    { id: 'Na0w3Mz46GA', title: 'Synthwave Radio', icon: '🌆' },
-    { id: 'hHW1oY26kxQ', title: 'Classical Focus', icon: '🎻' },
+    { id: 'jfKfPfyJRdk', title: 'Lofi Hip Hop Radio', icon: '🎧', type: 'video' },
+    { id: 'DWcJFNfaw9c', title: 'Jazz & Coffee', icon: '☕', type: 'video' },
+    { id: 'Na0w3Mz46GA', title: 'Synthwave Radio', icon: '🌆', type: 'video' },
+    { id: 'hHW1oY26kxQ', title: 'Classical Focus', icon: '🎻', type: 'video' },
 ];
 
 export default function MusicPlayer() {
@@ -19,20 +19,33 @@ export default function MusicPlayer() {
     const [newSongTitle, setNewSongTitle] = useState('');
     const [showAddForm, setShowAddForm] = useState(false);
 
-    const extractYouTubeId = (url) => {
-        const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\s]+)/);
-        return match ? match[1] : null;
+    // Extract video ID or playlist ID from URL
+    const parseYouTubeUrl = (url) => {
+        // Check for playlist URL first
+        const playlistMatch = url.match(/[?&]list=([^&\s]+)/);
+        if (playlistMatch) {
+            return { type: 'playlist', id: playlistMatch[1] };
+        }
+
+        // Check for video URL
+        const videoMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\s]+)/);
+        if (videoMatch) {
+            return { type: 'video', id: videoMatch[1] };
+        }
+
+        return null;
     };
 
     const handleAddSong = (e) => {
         e.preventDefault();
         if (!newSongUrl.trim()) return;
 
-        const videoId = extractYouTubeId(newSongUrl);
-        if (videoId) {
+        const parsed = parseYouTubeUrl(newSongUrl);
+        if (parsed) {
             const newSong = {
-                id: videoId,
-                title: newSongTitle.trim() || `Song ${playlist.length + 1}`,
+                id: parsed.id,
+                type: parsed.type,
+                title: newSongTitle.trim() || (parsed.type === 'playlist' ? `Playlist ${playlist.length + 1}` : `Song ${playlist.length + 1}`),
                 addedAt: new Date().toISOString(),
             };
             dispatch(addSong(newSong));
@@ -45,7 +58,7 @@ export default function MusicPlayer() {
                 dispatch(playSong({ song: newSong, index: 0 }));
             }
         } else {
-            alert('Please enter a valid YouTube URL');
+            alert('Please enter a valid YouTube video or playlist URL');
         }
     };
 
@@ -84,12 +97,12 @@ export default function MusicPlayer() {
             {/* Add Song Section */}
             <div className="add-song-section glass-card">
                 <div className="add-song-header">
-                    <h3>➕ Add Songs to Your Playlist</h3>
+                    <h3>➕ Add Songs or Playlists</h3>
                     <button
                         className="glass-button small"
                         onClick={() => setShowAddForm(!showAddForm)}
                     >
-                        {showAddForm ? '✕ Cancel' : 'Add Song'}
+                        {showAddForm ? '✕ Cancel' : 'Add Music'}
                     </button>
                 </div>
 
@@ -98,7 +111,7 @@ export default function MusicPlayer() {
                         <input
                             type="text"
                             className="glass-input"
-                            placeholder="Paste YouTube URL here..."
+                            placeholder="Paste YouTube video or playlist URL..."
                             value={newSongUrl}
                             onChange={(e) => setNewSongUrl(e.target.value)}
                             autoFocus
@@ -106,32 +119,37 @@ export default function MusicPlayer() {
                         <input
                             type="text"
                             className="glass-input"
-                            placeholder="Song name (optional)"
+                            placeholder="Name (optional)"
                             value={newSongTitle}
                             onChange={(e) => setNewSongTitle(e.target.value)}
                         />
                         <button type="submit" className="glass-button primary">
-                            Add to Playlist
+                            Add to Library
                         </button>
                     </form>
                 )}
 
-                <p className="add-hint">
-                    💡 Find any song on <a href="https://youtube.com" target="_blank" rel="noopener noreferrer">YouTube</a>, copy the URL, and paste it here!
-                </p>
+                <div className="add-hints">
+                    <p className="add-hint">
+                        🎵 <strong>Single song:</strong> Paste any YouTube video URL
+                    </p>
+                    <p className="add-hint">
+                        📋 <strong>Full playlist:</strong> Paste a YouTube playlist URL - it will play all songs automatically!
+                    </p>
+                </div>
             </div>
 
             <div className="music-content">
                 {/* My Playlist */}
                 <div className="playlist-section">
-                    <h3 className="section-title">❤️ My Playlist ({playlist.length})</h3>
+                    <h3 className="section-title">❤️ My Library ({playlist.length})</h3>
 
                     <div className="playlist-songs">
                         {playlist.length > 0 ? (
                             playlist.map((song, index) => (
                                 <div
                                     key={song.id + index}
-                                    className={`song-item ${currentSong?.id === song.id ? 'playing' : ''}`}
+                                    className={`song-item ${currentSong?.id === song.id ? 'playing' : ''} ${song.type === 'playlist' ? 'is-playlist' : ''}`}
                                 >
                                     <button
                                         className="song-play-btn"
@@ -139,9 +157,14 @@ export default function MusicPlayer() {
                                     >
                                         {currentSong?.id === song.id && isPlaying ? '▶' : '○'}
                                     </button>
-                                    <span className="song-title" onClick={() => handlePlaySong(song, index)}>
-                                        {song.title}
-                                    </span>
+                                    <div className="song-info">
+                                        <span className="song-title" onClick={() => handlePlaySong(song, index)}>
+                                            {song.type === 'playlist' && '📋 '}{song.title}
+                                        </span>
+                                        {song.type === 'playlist' && (
+                                            <span className="song-badge">Playlist</span>
+                                        )}
+                                    </div>
                                     <button
                                         className="song-remove-btn"
                                         onClick={() => handleRemoveSong(song.id)}
@@ -154,8 +177,8 @@ export default function MusicPlayer() {
                         ) : (
                             <div className="empty-playlist">
                                 <span className="empty-icon">🎵</span>
-                                <p>Your playlist is empty</p>
-                                <p className="hint">Add some songs above to get started!</p>
+                                <p>Your library is empty</p>
+                                <p className="hint">Add songs or playlists above to get started!</p>
                             </div>
                         )}
                     </div>
@@ -206,11 +229,17 @@ export default function MusicPlayer() {
                         <>
                             <div className="now-playing-header">
                                 <span className="now-playing-label">▶ Now Playing</span>
-                                <span className="now-playing-title">{currentSong.title}</span>
+                                <span className="now-playing-title">
+                                    {currentSong.type === 'playlist' && '📋 '}{currentSong.title}
+                                </span>
                             </div>
                             <div className="player-info">
                                 <p>🎧 Music is playing in the mini-player below</p>
-                                <p className="info-hint">Switch to any other page - music keeps playing!</p>
+                                {currentSong.type === 'playlist' ? (
+                                    <p className="info-hint">This is a playlist - songs will auto-play!</p>
+                                ) : (
+                                    <p className="info-hint">Switch to any other page - music keeps playing!</p>
+                                )}
                             </div>
                         </>
                     ) : (

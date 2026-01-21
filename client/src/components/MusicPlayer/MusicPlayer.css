@@ -73,6 +73,39 @@
     text-decoration: underline;
 }
 
+.add-hints {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+/* Song info with badge */
+.song-info {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    min-width: 0;
+    cursor: pointer;
+}
+
+.song-info .song-title {
+    flex: 1;
+}
+
+.song-badge {
+    font-size: 0.625rem;
+    background: var(--accent-secondary);
+    color: var(--bg-primary);
+    padding: 2px 6px;
+    border-radius: var(--radius-full);
+    flex-shrink: 0;
+}
+
+.song-item.is-playlist {
+    border-left-color: var(--accent-secondary);
+}
+
 /* Music Content */
 .music-content {
     display: grid;
