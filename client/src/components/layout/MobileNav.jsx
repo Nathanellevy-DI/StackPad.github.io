@@ -1,11 +1,11 @@
 import './MobileNav.css';
 
 const NAV_ITEMS = [
-    { id: 'dashboard', icon: '🏠', label: 'Home' },
-    { id: 'commands', icon: '⚡', label: 'Commands' },
-    { id: 'timer', icon: '⏱️', label: 'Timer' },
-    { id: 'notes', icon: '📝', label: 'Notes' },
-    { id: 'logs', icon: '📊', label: 'Logs' },
+    { id: 'dashboard', label: 'Home', icon: '🏠' },
+    { id: 'commands', label: 'Commands', icon: '⚡' },
+    { id: 'logs', label: 'Check-In', icon: '📋' },
+    { id: 'progress', label: 'Progress', icon: '📊' },
+    { id: 'notes', label: 'Notes', icon: '📌' },
 ];
 
 export default function MobileNav({ activeSection, onSectionChange }) {

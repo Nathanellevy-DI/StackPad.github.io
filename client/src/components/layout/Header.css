@@ -115,16 +115,25 @@
 }
 
 /* User Avatar */
-.user-avatar {
+.user-avatar-btn {
     width: 36px;
     height: 36px;
     border-radius: 50%;
     overflow: hidden;
     border: 2px solid var(--accent-primary);
     box-shadow: 0 0 10px var(--accent-glow);
+    cursor: pointer;
+    background: none;
+    padding: 0;
+    transition: all var(--transition-fast);
 }
 
-.user-avatar img {
+.user-avatar-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 20px var(--accent-glow);
+}
+
+.user-avatar-btn img {
     width: 100%;
     height: 100%;
     object-fit: cover;

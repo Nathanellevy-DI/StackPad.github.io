@@ -82,14 +82,11 @@
 
 .timer-time {
     display: block;
-    font-size: 3.5rem;
+    font-size: 3rem;
     font-weight: 700;
     font-family: 'JetBrains Mono', monospace;
     letter-spacing: 2px;
-    background: linear-gradient(135deg, var(--text-primary), var(--text-secondary));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: var(--text-primary);
 }
 
 .timer-mode-label {
@@ -126,6 +123,37 @@
 .mode-tab.active {
     background: var(--glass-bg);
     color: var(--text-primary);
+}
+
+/* Custom Time */
+.custom-time-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.custom-time-section label {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.custom-time-input {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.time-input {
+    width: 80px;
+    text-align: center;
+    font-size: 1rem;
+    height: 40px;
+}
+
+.time-unit {
+    color: var(--text-muted);
+    font-size: 0.875rem;
 }
 
 /* Timer Controls */
@@ -203,9 +231,9 @@
 }
 
 .ambient-btn.active {
-    background: rgba(6, 182, 212, 0.15);
-    border-color: var(--accent-cyan);
-    color: var(--accent-cyan);
+    background: rgba(172, 186, 196, 0.15);
+    border-color: var(--accent-primary);
+    color: var(--accent-primary);
 }
 
 .ambient-icon {
@@ -214,6 +242,87 @@
 
 .ambient-label {
     font-size: 0.6875rem;
+}
+
+/* Volume Control */
+.volume-control {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    margin-top: var(--spacing-md);
+    justify-content: center;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+}
+
+.volume-slider {
+    width: 120px;
+    height: 4px;
+    -webkit-appearance: none;
+    background: var(--glass-border);
+    border-radius: var(--radius-full);
+    cursor: pointer;
+}
+
+.volume-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--accent-primary);
+    cursor: pointer;
+}
+
+/* Lofi Section */
+.lofi-section {
+    width: 100%;
+    max-width: 400px;
+    margin-top: var(--spacing-md);
+}
+
+.lofi-toggle {
+    width: 100%;
+    justify-content: center;
+}
+
+.lofi-player {
+    margin-top: var(--spacing-md);
+}
+
+.lofi-options {
+    display: flex;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
+    justify-content: center;
+}
+
+.lofi-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.lofi-btn:hover,
+.lofi-btn.active {
+    border-color: var(--accent-primary);
+    color: var(--accent-primary);
+}
+
+.lofi-embed {
+    border-radius: var(--radius-md);
+    overflow: hidden;
+}
+
+.lofi-embed iframe {
+    border: none;
+    border-radius: var(--radius-md);
 }
 
 /* Responsive */

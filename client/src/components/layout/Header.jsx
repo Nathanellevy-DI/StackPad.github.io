@@ -1,10 +1,13 @@
 import { useSelector, useDispatch } from 'react-redux';
 import { toggleTheme } from '../../redux/slices/themeSlice';
+import { toggleProfileModal } from '../../redux/slices/userSlice';
+import WorkspaceSwitcher from '../WorkspaceSwitcher/WorkspaceSwitcher';
 import './Header.css';
 
 export default function Header() {
     const dispatch = useDispatch();
     const { mode } = useSelector((state) => state.theme);
+    const { user } = useSelector((state) => state.user);
 
     return (
         <header className="header glass-card">
@@ -13,10 +16,11 @@ export default function Header() {
                     <span className="logo-icon">📚</span>
                     <span className="logo-text">StackPad</span>
                 </div>
+                <WorkspaceSwitcher />
             </div>
 
             <div className="header-center">
-                <span className="greeting">Hello, Developer!</span>
+                <span className="greeting">Hello, {user.name}!</span>
             </div>
 
             <div className="header-right">
@@ -43,13 +47,17 @@ export default function Header() {
                     <span className={`toggle-slider ${mode}`}></span>
                 </button>
 
-                {/* User Avatar */}
-                <div className="user-avatar">
+                {/* User Avatar - Clickable */}
+                <button
+                    className="user-avatar-btn"
+                    onClick={() => dispatch(toggleProfileModal())}
+                    title="Edit Profile"
+                >
                     <img
-                        src="https://api.dicebear.com/7.x/avataaars/svg?seed=developer"
+                        src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user.avatarSeed}`}
                         alt="User avatar"
                     />
-                </div>
+                </button>
             </div>
         </header>
     );

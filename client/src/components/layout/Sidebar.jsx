@@ -1,12 +1,14 @@
 import './Sidebar.css';
 
 const NAV_ITEMS = [
-    { id: 'dashboard', icon: '🏠', label: 'Dashboard' },
-    { id: 'commands', icon: '⚡', label: 'Commands' },
-    { id: 'timer', icon: '⏱️', label: 'Zen Timer' },
-    { id: 'notes', icon: '📝', label: 'Notes' },
-    { id: 'logs', icon: '📊', label: 'Logs' },
-    { id: 'hints', icon: '💡', label: 'DevHints' },
+    { id: 'dashboard', label: 'Dashboard', icon: '🏠' },
+    { id: 'todos', label: 'To-Do', icon: '✅' },
+    { id: 'commands', label: 'Commands', icon: '⚡' },
+    { id: 'timer', label: 'Zen Timer', icon: '🧘' },
+    { id: 'notes', label: 'Notes', icon: '📌' },
+    { id: 'logs', label: 'Check-In', icon: '📋' },
+    { id: 'progress', label: 'Progress', icon: '📊' },
+    { id: 'hints', label: 'DevHints', icon: '💡' },
 ];
 
 export default function Sidebar({ activeSection, onSectionChange }) {

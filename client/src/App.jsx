@@ -13,6 +13,9 @@ import ZenTimer from './components/ZenTimer/ZenTimer';
 import SystemLogs from './components/SystemLogs/SystemLogs';
 import StickyNotes from './components/StickyNotes/StickyNotes';
 import DevHints from './components/DevHints/DevHints';
+import UserProfile from './components/UserProfile/UserProfile';
+import ProgressStats from './components/ProgressStats/ProgressStats';
+import TodoList from './components/TodoList/TodoList';
 
 import './App.css';
 
@@ -32,11 +35,19 @@ function Dashboard() {
       case 'timer':
         return <ZenTimer />;
       case 'notes':
-        return <StickyNotes />;
+        return (
+          <div className="full-page-section">
+            <StickyNotes />
+          </div>
+        );
       case 'logs':
         return <SystemLogs />;
       case 'hints':
         return <DevHints />;
+      case 'progress':
+        return <ProgressStats />;
+      case 'todos':
+        return <TodoList />;
       case 'dashboard':
       default:
         return (
@@ -61,6 +72,7 @@ function Dashboard() {
   return (
     <div className="app-container">
       <Header />
+      <UserProfile />
 
       <div className="app-layout">
         <Sidebar

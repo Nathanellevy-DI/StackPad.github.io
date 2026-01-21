@@ -1,34 +1,59 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { selectCurrentWorkspace, updateNotes } from '../../redux/slices/workspaceSlice';
 import './StickyNotes.css';
 
 const COLORS = [
-    { id: 'yellow', bg: 'var(--sticky-yellow)', text: '#1a1a1a' },
-    { id: 'orange', bg: 'var(--sticky-orange)', text: '#1a1a1a' },
-    { id: 'pink', bg: 'var(--sticky-pink)', text: '#1a1a1a' },
-    { id: 'blue', bg: 'var(--sticky-blue)', text: '#1a1a1a' },
-    { id: 'green', bg: 'var(--sticky-green)', text: '#1a1a1a' },
+    { id: 'yellow', bg: '#fef9c3', text: '#1a1a1a' },
+    { id: 'orange', bg: '#fed7aa', text: '#1a1a1a' },
+    { id: 'pink', bg: '#fecdd3', text: '#1a1a1a' },
+    { id: 'blue', bg: '#bfdbfe', text: '#1a1a1a' },
+    { id: 'green', bg: '#bbf7d0', text: '#1a1a1a' },
 ];
 
-const INITIAL_NOTES = [
-    { id: 1, content: 'Remember to update the API docs 📚', color: 'yellow', x: 20, y: 20 },
-    { id: 2, content: 'Fix the mobile nav z-index issue', color: 'pink', x: 220, y: 80 },
-    { id: 3, content: 'Code review for PR #42', color: 'orange', x: 120, y: 180 },
+const SIZES = [
+    { id: 'small', width: 150, height: 120, label: 'S' },
+    { id: 'medium', width: 200, height: 180, label: 'M' },
+    { id: 'large', width: 280, height: 240, label: 'L' },
 ];
 
 export default function StickyNotes() {
-    const [notes, setNotes] = useState(INITIAL_NOTES);
+    const dispatch = useDispatch();
+    const workspace = useSelector(selectCurrentWorkspace);
+    const savedNotes = workspace?.notes || [];
+
+    const [notes, setNotes] = useState(savedNotes.length > 0 ? savedNotes : [
+        { id: 1, content: 'Welcome to StackPad! 📚', color: 'yellow', size: 'medium', x: 3, y: 5 },
+        { id: 2, content: 'Drag me around!', color: 'pink', size: 'medium', x: 20, y: 8 },
+    ]);
     const [activeNote, setActiveNote] = useState(null);
     const [isDragging, setIsDragging] = useState(false);
     const containerRef = useRef(null);
     const dragOffset = useRef({ x: 0, y: 0 });
+
+    // Sync with Redux when workspace changes
+    useEffect(() => {
+        if (savedNotes.length > 0) {
+            setNotes(savedNotes);
+        }
+    }, [workspace?.id]);
+
+    // Save to Redux whenever notes change
+    useEffect(() => {
+        const timeout = setTimeout(() => {
+            dispatch(updateNotes(notes));
+        }, 500);
+        return () => clearTimeout(timeout);
+    }, [notes, dispatch]);
 
     const addNote = () => {
         const newNote = {
             id: Date.now(),
             content: '',
             color: COLORS[Math.floor(Math.random() * COLORS.length)].id,
-            x: Math.random() * 100,
-            y: Math.random() * 100,
+            size: 'medium',
+            x: 5 + Math.random() * 20,
+            y: 5 + Math.random() * 15,
         };
         setNotes([...notes, newNote]);
         setActiveNote(newNote.id);
@@ -51,6 +76,12 @@ export default function StickyNotes() {
         ));
     };
 
+    const changeSize = (id, size) => {
+        setNotes(notes.map(note =>
+            note.id === id ? { ...note, size } : note
+        ));
+    };
+
     const handleMouseDown = (e, id) => {
         if (e.target.tagName === 'TEXTAREA' || e.target.closest('.sticky-actions')) return;
 
@@ -64,7 +95,6 @@ export default function StickyNotes() {
             y: e.clientY - (note.y / 100 * rect.height),
         };
 
-        // Bring to front
         setNotes(prev => {
             const filtered = prev.filter(n => n.id !== id);
             return [...filtered, prev.find(n => n.id === id)];
@@ -80,7 +110,7 @@ export default function StickyNotes() {
 
         setNotes(notes.map(note =>
             note.id === activeNote
-                ? { ...note, x: Math.max(0, Math.min(80, x)), y: Math.max(0, Math.min(80, y)) }
+                ? { ...note, x: Math.max(0, Math.min(80, x)), y: Math.max(0, Math.min(75, y)) }
                 : note
         ));
     };
@@ -90,26 +120,28 @@ export default function StickyNotes() {
     };
 
     return (
-        <div className="sticky-notes">
+        <div className="sticky-notes full-height">
             <div className="sticky-header">
                 <h2 className="sticky-title">
                     <span className="title-icon">📌</span>
                     Sticky Notes
+                    <span className="saved-indicator">✓ Auto-saved</span>
                 </h2>
-                <button className="add-sticky-btn glass-button" onClick={addNote}>
-                    + Add Note
+                <button className="glass-button primary add-note-btn" onClick={addNote}>
+                    + New Note
                 </button>
             </div>
 
             <div
                 ref={containerRef}
-                className="sticky-board glass-card"
+                className="sticky-board"
                 onMouseMove={handleMouseMove}
                 onMouseUp={handleMouseUp}
                 onMouseLeave={handleMouseUp}
             >
                 {notes.map((note, index) => {
                     const colorData = COLORS.find(c => c.id === note.color) || COLORS[0];
+                    const sizeData = SIZES.find(s => s.id === note.size) || SIZES[1];
                     return (
                         <div
                             key={note.id}
@@ -117,8 +149,10 @@ export default function StickyNotes() {
                             style={{
                                 left: `${note.x}%`,
                                 top: `${note.y}%`,
-                                '--sticky-bg': colorData.bg,
-                                '--sticky-text': colorData.text,
+                                backgroundColor: colorData.bg,
+                                color: colorData.text,
+                                width: `${sizeData.width}px`,
+                                minHeight: `${sizeData.height}px`,
                                 zIndex: index + 1,
                             }}
                             onMouseDown={(e) => handleMouseDown(e, note.id)}
@@ -134,6 +168,17 @@ export default function StickyNotes() {
                                         />
                                     ))}
                                 </div>
+                                <div className="size-btns">
+                                    {SIZES.map(s => (
+                                        <button
+                                            key={s.id}
+                                            className={`size-btn ${note.size === s.id ? 'active' : ''}`}
+                                            onClick={() => changeSize(note.id, s.id)}
+                                        >
+                                            {s.label}
+                                        </button>
+                                    ))}
+                                </div>
                                 <button
                                     className="delete-sticky"
                                     onClick={() => deleteNote(note.id)}
@@ -147,6 +192,7 @@ export default function StickyNotes() {
                                 onChange={(e) => updateNote(note.id, e.target.value)}
                                 placeholder="Write something..."
                                 onClick={() => setActiveNote(note.id)}
+                                style={{ minHeight: `${sizeData.height - 50}px` }}
                             />
                         </div>
                     );
@@ -155,7 +201,7 @@ export default function StickyNotes() {
                 {notes.length === 0 && (
                     <div className="empty-board">
                         <span className="empty-icon">📝</span>
-                        <p>Click "Add Note" to create your first sticky!</p>
+                        <p>Click "New Note" to create your first sticky!</p>
                     </div>
                 )}
             </div>

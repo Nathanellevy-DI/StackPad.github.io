@@ -1,26 +1,36 @@
 .app-container {
   min-height: 100vh;
-  padding: var(--spacing-md);
-  padding-bottom: calc(70px + var(--spacing-md));
-  /* Space for mobile nav */
+  padding: var(--spacing-lg);
+  padding-bottom: calc(80px + var(--spacing-lg));
 }
 
 @media (min-width: 1024px) {
   .app-container {
-    padding-bottom: var(--spacing-md);
+    padding-bottom: var(--spacing-lg);
   }
 }
 
 .app-layout {
   display: flex;
-  gap: var(--spacing-lg);
-  max-width: 1800px;
+  gap: var(--spacing-xl);
+  max-width: 1600px;
   margin: 0 auto;
 }
 
 .main-content {
   flex: 1;
   min-width: 0;
+}
+
+/* Full Page Section (for Notes) */
+.full-page-section {
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  min-height: calc(100vh - 200px);
+  overflow: hidden;
 }
 
 /* Dashboard Grid */
@@ -38,8 +48,8 @@
 
 @media (min-width: 1200px) {
   .dashboard-grid {
-    grid-template-columns: repeat(2, 1fr);
-    grid-template-rows: auto auto;
+    grid-template-columns: 1fr 1.2fr;
+    grid-template-rows: auto auto auto;
   }
 
   .timer-section {
@@ -50,6 +60,8 @@
   .commands-section {
     grid-row: 1 / span 2;
     grid-column: 2;
+    max-height: 700px;
+    overflow-y: auto;
   }
 
   .logs-section {
@@ -60,6 +72,7 @@
   .stickies-section {
     grid-row: 3;
     grid-column: 1 / -1;
+    min-height: 400px;
   }
 }
 
@@ -70,6 +83,11 @@
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-lg);
   overflow: hidden;
+  transition: box-shadow var(--transition-normal);
+}
+
+.dashboard-section:hover {
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
 }
 
 /* Section specific styles */
@@ -77,31 +95,43 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: var(--spacing-lg) 0;
+}
+
+.commands-section {
+  scrollbar-width: thin;
 }
 
 /* Background decoration */
 .app-container::before {
   content: '';
   position: fixed;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   background:
-    radial-gradient(circle at 20% 80%, rgba(124, 58, 237, 0.15) 0%, transparent 50%),
-    radial-gradient(circle at 80% 20%, rgba(6, 182, 212, 0.1) 0%, transparent 50%),
-    radial-gradient(circle at 40% 40%, rgba(236, 72, 153, 0.08) 0%, transparent 40%);
+    radial-gradient(ellipse at 20% 80%, rgba(48, 54, 79, 0.25) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(172, 186, 196, 0.12) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 50%, rgba(225, 217, 188, 0.05) 0%, transparent 40%);
   pointer-events: none;
   z-index: -1;
 }
 
 [data-theme="light"] .app-container::before {
   background:
-    radial-gradient(circle at 20% 80%, rgba(124, 58, 237, 0.08) 0%, transparent 50%),
-    radial-gradient(circle at 80% 20%, rgba(6, 182, 212, 0.06) 0%, transparent 50%);
+    radial-gradient(ellipse at 20% 80%, rgba(48, 54, 79, 0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(172, 186, 196, 0.08) 0%, transparent 50%);
 }
 
 /* Smooth theme transition */
 * {
-  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.2s ease;
+}
+
+/* Override transition for interactive elements */
+button,
+a,
+input {
+  transition: all 0.15s ease;
 }
