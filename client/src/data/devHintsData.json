@@ -1,0 +1,152 @@
+[
+    {
+        "category": "git",
+        "hints": [
+            {
+                "title": "Undo last commit",
+                "shortcut": "git reset --soft HEAD~1",
+                "description": "Undo last commit but keep changes staged"
+            },
+            {
+                "title": "Amend commit message",
+                "shortcut": "git commit --amend -m 'New message'",
+                "description": "Change the last commit message"
+            },
+            {
+                "title": "Stash changes",
+                "shortcut": "git stash / git stash pop",
+                "description": "Temporarily save and restore changes"
+            },
+            {
+                "title": "Cherry-pick commit",
+                "shortcut": "git cherry-pick <commit-hash>",
+                "description": "Apply a specific commit to current branch"
+            },
+            {
+                "title": "View commit history",
+                "shortcut": "git log --oneline --graph",
+                "description": "Visual commit history"
+            }
+        ]
+    },
+    {
+        "category": "react",
+        "hints": [
+            {
+                "title": "useState Hook",
+                "shortcut": "const [state, setState] = useState(initial)",
+                "description": "Add state to functional components"
+            },
+            {
+                "title": "useEffect Hook",
+                "shortcut": "useEffect(() => { /* effect */ }, [deps])",
+                "description": "Handle side effects in components"
+            },
+            {
+                "title": "useCallback Hook",
+                "shortcut": "useCallback(() => fn, [deps])",
+                "description": "Memoize callback functions"
+            },
+            {
+                "title": "useMemo Hook",
+                "shortcut": "useMemo(() => value, [deps])",
+                "description": "Memoize expensive computations"
+            },
+            {
+                "title": "useRef Hook",
+                "shortcut": "const ref = useRef(initialValue)",
+                "description": "Persist mutable values across renders"
+            }
+        ]
+    },
+    {
+        "category": "css",
+        "hints": [
+            {
+                "title": "Flexbox Center",
+                "shortcut": "display: flex; justify-content: center; align-items: center;",
+                "description": "Center items horizontally and vertically"
+            },
+            {
+                "title": "Grid Layout",
+                "shortcut": "display: grid; grid-template-columns: repeat(3, 1fr);",
+                "description": "Create equal-width columns"
+            },
+            {
+                "title": "Glassmorphism",
+                "shortcut": "background: rgba(255,255,255,0.1); backdrop-filter: blur(10px);",
+                "description": "Frosted glass effect"
+            },
+            {
+                "title": "Text Gradient",
+                "shortcut": "background: linear-gradient(...); -webkit-background-clip: text;",
+                "description": "Gradient colored text"
+            },
+            {
+                "title": "Smooth Scroll",
+                "shortcut": "scroll-behavior: smooth;",
+                "description": "Enable smooth scrolling"
+            }
+        ]
+    },
+    {
+        "category": "javascript",
+        "hints": [
+            {
+                "title": "Destructuring",
+                "shortcut": "const { a, b } = obj; const [x, y] = arr;",
+                "description": "Extract values from objects/arrays"
+            },
+            {
+                "title": "Spread Operator",
+                "shortcut": "const newArr = [...arr, newItem]",
+                "description": "Clone and add items to arrays"
+            },
+            {
+                "title": "Optional Chaining",
+                "shortcut": "obj?.property?.nested",
+                "description": "Safe property access"
+            },
+            {
+                "title": "Nullish Coalescing",
+                "shortcut": "value ?? defaultValue",
+                "description": "Default value for null/undefined"
+            },
+            {
+                "title": "Async/Await",
+                "shortcut": "const data = await fetch(url).then(r => r.json())",
+                "description": "Handle promises elegantly"
+            }
+        ]
+    },
+    {
+        "category": "terminal",
+        "hints": [
+            {
+                "title": "Kill process on port",
+                "shortcut": "kill -9 $(lsof -t -i:PORT)",
+                "description": "Kill process using specific port"
+            },
+            {
+                "title": "Find files",
+                "shortcut": "find . -name '*.js' -type f",
+                "description": "Find files by pattern"
+            },
+            {
+                "title": "Disk usage",
+                "shortcut": "du -sh */",
+                "description": "Check folder sizes"
+            },
+            {
+                "title": "Watch files",
+                "shortcut": "watch -n 1 'command'",
+                "description": "Run command every second"
+            },
+            {
+                "title": "Search in files",
+                "shortcut": "grep -r 'pattern' ./",
+                "description": "Search recursively in directory"
+            }
+        ]
+    }
+]
