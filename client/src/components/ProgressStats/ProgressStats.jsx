@@ -1,11 +1,13 @@
-import { useState, useEffect, useMemo } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { selectCurrentWorkspace, updateLogs } from '../../redux/slices/workspaceSlice';
+import { useState, useMemo } from 'react';
+import { useSelector } from 'react-redux';
+import { selectCurrentWorkspace } from '../../redux/slices/workspaceSlice';
 import './ProgressStats.css';
 
 export default function ProgressStats() {
     const workspace = useSelector(selectCurrentWorkspace);
     const logs = workspace?.logs || [];
+    const [copied, setCopied] = useState(false);
+    const [showShareModal, setShowShareModal] = useState(false);
 
     // Calculate stats
     const stats = useMemo(() => {
@@ -21,6 +23,9 @@ export default function ProgressStats() {
             acc[log.type] = (acc[log.type] || 0) + 1;
             return acc;
         }, {});
+
+        // Total hours
+        const totalHours = logs.reduce((sum, log) => sum + (log.hours || 0), 0);
 
         // Last 7 days activity
         const dailyActivity = [];
@@ -48,6 +53,7 @@ export default function ProgressStats() {
             byType,
             dailyActivity,
             streak: calculateStreak(logs),
+            totalHours,
         };
     }, [logs]);
 
@@ -79,16 +85,72 @@ export default function ProgressStats() {
         return streak;
     }
 
+    const generateShareText = () => {
+        return `🚀 My Developer Progress on ${workspace?.name || 'StackPad'}!
+
+🔥 ${stats.streak} Day Streak
+📊 ${stats.total} Total Check-ins
+⏱️ ${stats.totalHours.toFixed(1)} Hours Logged
+🚀 ${stats.byType.progress || 0} Progress Updates
+💡 ${stats.byType.gotcha || 0} Gotchas Found
+
+#Developer #Productivity #Coding #100DaysOfCode`;
+    };
+
+    const generateMarkdown = () => {
+        return `## 📊 My Developer Progress
+
+| Metric | Value |
+|--------|-------|
+| 🔥 Streak | ${stats.streak} days |
+| 📊 Total Check-ins | ${stats.total} |
+| ⏱️ Hours Logged | ${stats.totalHours.toFixed(1)}h |
+| 🚀 Progress Updates | ${stats.byType.progress || 0} |
+| 💡 Gotchas | ${stats.byType.gotcha || 0} |
+| 🐛 Bugs Fixed | ${stats.byType.error || 0} |
+| ✨ Tips Learned | ${stats.byType.tip || 0} |
+
+*Generated with StackPad*`;
+    };
+
+    const copyToClipboard = async (text) => {
+        try {
+            await navigator.clipboard.writeText(text);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+        } catch (err) {
+            console.error('Failed to copy:', err);
+        }
+    };
+
+    const shareToLinkedIn = () => {
+        const text = encodeURIComponent(generateShareText());
+        window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.href)}&summary=${text}`, '_blank');
+    };
+
+    const shareToTwitter = () => {
+        const text = encodeURIComponent(generateShareText());
+        window.open(`https://twitter.com/intent/tweet?text=${text}`, '_blank');
+    };
+
     const maxActivity = Math.max(...stats.dailyActivity.map(d => d.count), 1);
 
     return (
         <div className="progress-stats">
             <div className="stats-header">
-                <h2 className="stats-title">
-                    <span className="title-icon">📊</span>
-                    Progress Stats
-                </h2>
-                <span className="workspace-label">{workspace?.name}</span>
+                <div>
+                    <h2 className="stats-title">
+                        <span className="title-icon">📊</span>
+                        Progress Stats
+                    </h2>
+                    <span className="workspace-label">{workspace?.name}</span>
+                </div>
+                <button
+                    className="glass-button primary share-btn"
+                    onClick={() => setShowShareModal(true)}
+                >
+                    📤 Share Progress
+                </button>
             </div>
 
             {/* Stats Cards */}
@@ -115,10 +177,10 @@ export default function ProgressStats() {
                     </div>
                 </div>
                 <div className="stat-card glass-card">
-                    <span className="stat-icon">📚</span>
+                    <span className="stat-icon">⏱️</span>
                     <div className="stat-info">
-                        <span className="stat-value">{stats.total}</span>
-                        <span className="stat-label">Total Logs</span>
+                        <span className="stat-value">{stats.totalHours.toFixed(1)}h</span>
+                        <span className="stat-label">Total Hours</span>
                     </div>
                 </div>
             </div>
@@ -190,6 +252,57 @@ export default function ProgressStats() {
                     )}
                 </div>
             </div>
+
+            {/* Share Modal */}
+            {showShareModal && (
+                <div className="modal-overlay" onClick={() => setShowShareModal(false)}>
+                    <div className="modal glass-card share-modal" onClick={(e) => e.stopPropagation()}>
+                        <div className="modal-header">
+                            <h3>📤 Share Your Progress</h3>
+                            <button className="modal-close" onClick={() => setShowShareModal(false)}>✕</button>
+                        </div>
+
+                        <div className="modal-body">
+                            <div className="share-buttons">
+                                <button className="share-option linkedin" onClick={shareToLinkedIn}>
+                                    <span className="share-icon">💼</span>
+                                    <span>Share on LinkedIn</span>
+                                </button>
+                                <button className="share-option twitter" onClick={shareToTwitter}>
+                                    <span className="share-icon">🐦</span>
+                                    <span>Share on X/Twitter</span>
+                                </button>
+                            </div>
+
+                            <div className="share-divider">
+                                <span>or copy</span>
+                            </div>
+
+                            <div className="share-copy-section">
+                                <h4>📋 Copy for Social Media</h4>
+                                <pre className="share-preview">{generateShareText()}</pre>
+                                <button
+                                    className={`glass-button ${copied ? 'copied' : 'primary'}`}
+                                    onClick={() => copyToClipboard(generateShareText())}
+                                >
+                                    {copied ? '✓ Copied!' : 'Copy Text'}
+                                </button>
+                            </div>
+
+                            <div className="share-copy-section">
+                                <h4>📝 GitHub README Markdown</h4>
+                                <pre className="share-preview markdown">{generateMarkdown()}</pre>
+                                <button
+                                    className="glass-button primary"
+                                    onClick={() => copyToClipboard(generateMarkdown())}
+                                >
+                                    Copy Markdown
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

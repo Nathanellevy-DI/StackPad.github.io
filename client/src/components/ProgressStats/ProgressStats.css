@@ -236,3 +236,103 @@
         height: 150px;
     }
 }
+
+/* Share Modal */
+.share-btn {
+    font-size: 0.9375rem;
+}
+
+.share-modal {
+    max-width: 550px;
+}
+
+.share-buttons {
+    display: flex;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+}
+
+.share-option {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-md) var(--spacing-lg);
+    border-radius: var(--radius-md);
+    border: none;
+    cursor: pointer;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    transition: all var(--transition-fast);
+}
+
+.share-option.linkedin {
+    background: #0077B5;
+    color: white;
+}
+
+.share-option.linkedin:hover {
+    background: #005885;
+}
+
+.share-option.twitter {
+    background: #1DA1F2;
+    color: white;
+}
+
+.share-option.twitter:hover {
+    background: #0d8bd9;
+}
+
+.share-icon {
+    font-size: 1.25rem;
+}
+
+.share-divider {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    margin: var(--spacing-lg) 0;
+    color: var(--text-muted);
+    font-size: 0.75rem;
+}
+
+.share-divider::before,
+.share-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--glass-border);
+}
+
+.share-copy-section {
+    margin-bottom: var(--spacing-lg);
+}
+
+.share-copy-section h4 {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin-bottom: var(--spacing-sm);
+}
+
+.share-preview {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-md);
+    font-size: 0.75rem;
+    color: var(--text-primary);
+    overflow-x: auto;
+    white-space: pre-wrap;
+    margin-bottom: var(--spacing-sm);
+    max-height: 150px;
+    overflow-y: auto;
+}
+
+.share-preview.markdown {
+    font-family: 'JetBrains Mono', monospace;
+}
+
+.glass-button.copied {
+    background: var(--accent-green);
+}
