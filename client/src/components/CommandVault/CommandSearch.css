@@ -386,3 +386,186 @@
         width: 100%;
     }
 }
+
+/* Steps Section (Add Form) */
+.steps-section {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-md);
+}
+
+.steps-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-md);
+}
+
+.steps-label {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.add-step-btn {
+    background: transparent;
+    border: 1px dashed var(--glass-border);
+    border-radius: var(--radius-sm);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    color: var(--accent-primary);
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.add-step-btn:hover {
+    background: var(--accent-primary);
+    border-style: solid;
+    color: var(--bg-primary);
+}
+
+.step-row {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-sm);
+}
+
+.step-number {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    background: var(--accent-primary);
+    color: var(--bg-primary);
+    border-radius: 50%;
+    font-size: 0.75rem;
+    font-weight: 600;
+    flex-shrink: 0;
+    margin-top: 10px;
+}
+
+.step-inputs {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+}
+
+.step-command {
+    height: 40px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8125rem;
+}
+
+.step-desc {
+    height: 36px;
+    font-size: 0.8125rem;
+}
+
+.remove-step-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 4px 8px;
+    margin-top: 8px;
+    opacity: 0.5;
+    transition: all var(--transition-fast);
+}
+
+.remove-step-btn:hover {
+    opacity: 1;
+    color: #ef4444;
+}
+
+/* Multi-step Command Display */
+.steps-badge {
+    font-size: 0.625rem;
+    background: var(--accent-primary);
+    color: var(--bg-primary);
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+    margin-left: var(--spacing-sm);
+    font-weight: normal;
+}
+
+.command-steps {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.command-step {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-sm);
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-sm) var(--spacing-md);
+}
+
+.step-index {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    background: var(--accent-secondary);
+    color: var(--bg-primary);
+    border-radius: 50%;
+    font-size: 0.625rem;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+.step-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.step-label {
+    font-size: 0.6875rem;
+    color: var(--text-muted);
+}
+
+.command-step .command-code {
+    font-size: 0.75rem;
+}
+
+.copy-btn.small {
+    padding: 4px 8px;
+    font-size: 0.625rem;
+}
+
+.copy-all-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-xs);
+    width: 100%;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-sm);
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    margin-top: var(--spacing-sm);
+}
+
+.copy-all-btn:hover {
+    background: var(--accent-primary);
+    border-color: var(--accent-primary);
+    color: var(--bg-primary);
+}
+
+.copy-all-btn.copied {
+    background: var(--accent-green);
+    border-color: var(--accent-green);
+    color: white;
+}
