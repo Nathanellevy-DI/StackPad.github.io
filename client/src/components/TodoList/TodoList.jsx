@@ -1,71 +1,79 @@
 import { useState, useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { selectCurrentWorkspace } from '../../redux/slices/workspaceSlice';
 import './TodoList.css';
 
-// Custom hook for localStorage with workspace
-function useWorkspaceTodos() {
-    const workspace = useSelector(selectCurrentWorkspace);
-    const key = `stackpad-todos-${workspace?.id || 'default'}`;
-
-    const [todos, setTodos] = useState(() => {
-        const stored = localStorage.getItem(key);
-        return stored ? JSON.parse(stored) : [];
-    });
-
-    useEffect(() => {
-        const stored = localStorage.getItem(key);
-        setTodos(stored ? JSON.parse(stored) : []);
-    }, [key]);
-
-    useEffect(() => {
-        localStorage.setItem(key, JSON.stringify(todos));
-    }, [todos, key]);
-
-    return [todos, setTodos];
-}
-
 export default function TodoList() {
     const workspace = useSelector(selectCurrentWorkspace);
-    const [todos, setTodos] = useWorkspaceTodos();
+    const storageKey = `stackpad-todos-${workspace?.id || 'default'}`;
+
+    // Initialize todos from localStorage
+    const [todos, setTodos] = useState(() => {
+        try {
+            const stored = localStorage.getItem(storageKey);
+            return stored ? JSON.parse(stored) : [];
+        } catch {
+            return [];
+        }
+    });
+
     const [newTodo, setNewTodo] = useState('');
     const [filter, setFilter] = useState('all');
 
+    // Load todos when workspace changes
+    useEffect(() => {
+        try {
+            const stored = localStorage.getItem(storageKey);
+            setTodos(stored ? JSON.parse(stored) : []);
+        } catch {
+            setTodos([]);
+        }
+    }, [storageKey]);
+
+    // Save todos whenever they change
+    useEffect(() => {
+        localStorage.setItem(storageKey, JSON.stringify(todos));
+    }, [todos, storageKey]);
+
     const addTodo = (e) => {
         e.preventDefault();
-        if (!newTodo.trim()) return;
+        const text = newTodo.trim();
+        if (!text) return;
 
-        setTodos([
-            ...todos,
-            {
-                id: Date.now(),
-                text: newTodo.trim(),
-                completed: false,
-                priority: 'normal',
-                createdAt: new Date().toISOString(),
-            },
-        ]);
+        const newTask = {
+            id: Date.now(),
+            text: text,
+            completed: false,
+            priority: 'normal',
+            createdAt: new Date().toISOString(),
+        };
+
+        setTodos(prevTodos => [...prevTodos, newTask]);
         setNewTodo('');
     };
 
     const toggleTodo = (id) => {
-        setTodos(todos.map(todo =>
-            todo.id === id ? { ...todo, completed: !todo.completed } : todo
-        ));
+        setTodos(prevTodos =>
+            prevTodos.map(todo =>
+                todo.id === id ? { ...todo, completed: !todo.completed } : todo
+            )
+        );
     };
 
     const deleteTodo = (id) => {
-        setTodos(todos.filter(todo => todo.id !== id));
+        setTodos(prevTodos => prevTodos.filter(todo => todo.id !== id));
     };
 
     const setPriority = (id, priority) => {
-        setTodos(todos.map(todo =>
-            todo.id === id ? { ...todo, priority } : todo
-        ));
+        setTodos(prevTodos =>
+            prevTodos.map(todo =>
+                todo.id === id ? { ...todo, priority } : todo
+            )
+        );
     };
 
     const clearCompleted = () => {
-        setTodos(todos.filter(todo => !todo.completed));
+        setTodos(prevTodos => prevTodos.filter(todo => !todo.completed));
     };
 
     const filteredTodos = todos.filter(todo => {
@@ -84,7 +92,7 @@ export default function TodoList() {
                     <span className="title-icon">✅</span>
                     To-Do List
                 </h2>
-                <span className="todo-workspace">{workspace?.name}</span>
+                <span className="todo-workspace">{workspace?.name || 'Default'}</span>
             </div>
 
             {/* Add Todo Form */}
@@ -96,26 +104,29 @@ export default function TodoList() {
                     value={newTodo}
                     onChange={(e) => setNewTodo(e.target.value)}
                 />
-                <button type="submit" className="glass-button primary">
-                    Add Task
+                <button type="submit" className="glass-button primary add-btn">
+                    + Add Task
                 </button>
             </form>
 
             {/* Filter Tabs */}
             <div className="todo-filters">
                 <button
+                    type="button"
                     className={`filter-btn ${filter === 'all' ? 'active' : ''}`}
                     onClick={() => setFilter('all')}
                 >
                     All ({todos.length})
                 </button>
                 <button
+                    type="button"
                     className={`filter-btn ${filter === 'active' ? 'active' : ''}`}
                     onClick={() => setFilter('active')}
                 >
                     Active ({activeCount})
                 </button>
                 <button
+                    type="button"
                     className={`filter-btn ${filter === 'completed' ? 'active' : ''}`}
                     onClick={() => setFilter('completed')}
                 >
@@ -132,6 +143,7 @@ export default function TodoList() {
                             className={`todo-item ${todo.completed ? 'completed' : ''} priority-${todo.priority}`}
                         >
                             <button
+                                type="button"
                                 className="todo-checkbox"
                                 onClick={() => toggleTodo(todo.id)}
                             >
@@ -149,6 +161,7 @@ export default function TodoList() {
                                     <option value="high">High</option>
                                 </select>
                                 <button
+                                    type="button"
                                     className="todo-delete"
                                     onClick={() => deleteTodo(todo.id)}
                                 >
@@ -168,7 +181,7 @@ export default function TodoList() {
             {/* Footer */}
             {completedCount > 0 && (
                 <div className="todo-footer">
-                    <button className="clear-btn" onClick={clearCompleted}>
+                    <button type="button" className="clear-btn" onClick={clearCompleted}>
                         🧹 Clear completed ({completedCount})
                     </button>
                 </div>

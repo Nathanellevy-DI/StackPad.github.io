@@ -27,21 +27,26 @@ export default function CommandSearch() {
         (state) => state.commands
     );
     const [copiedId, setCopiedId] = useState(null);
+    const [copiedStep, setCopiedStep] = useState(null);
     const [showAddForm, setShowAddForm] = useState(false);
     const [newCommand, setNewCommand] = useState({
         title: '',
-        command: '',
         category: 'custom',
         description: '',
         tags: '',
+        steps: [{ command: '', description: '' }],
     });
 
     // Filter commands
     const filteredCommands = useMemo(() => {
         return commands.filter((cmd) => {
+            const commandText = cmd.steps
+                ? cmd.steps.map(s => s.command).join(' ')
+                : cmd.command || '';
+
             const matchesSearch =
                 cmd.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                cmd.command.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                commandText.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 cmd.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 cmd.tags.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase()));
 
@@ -52,26 +57,80 @@ export default function CommandSearch() {
         });
     }, [commands, searchQuery, selectedCategory, showFavoritesOnly]);
 
-    const handleCopy = async (command, id) => {
+    const handleCopy = async (command, id, stepIndex = null) => {
         try {
             await navigator.clipboard.writeText(command);
             setCopiedId(id);
-            setTimeout(() => setCopiedId(null), 2000);
+            setCopiedStep(stepIndex);
+            setTimeout(() => {
+                setCopiedId(null);
+                setCopiedStep(null);
+            }, 2000);
         } catch (err) {
             console.error('Failed to copy:', err);
         }
     };
 
+    const handleCopyAll = async (steps, id) => {
+        try {
+            const allCommands = steps.map(s => s.command).join('\n');
+            await navigator.clipboard.writeText(allCommands);
+            setCopiedId(id);
+            setCopiedStep('all');
+            setTimeout(() => {
+                setCopiedId(null);
+                setCopiedStep(null);
+            }, 2000);
+        } catch (err) {
+            console.error('Failed to copy:', err);
+        }
+    };
+
+    const addStep = () => {
+        setNewCommand({
+            ...newCommand,
+            steps: [...newCommand.steps, { command: '', description: '' }],
+        });
+    };
+
+    const removeStep = (index) => {
+        if (newCommand.steps.length > 1) {
+            setNewCommand({
+                ...newCommand,
+                steps: newCommand.steps.filter((_, i) => i !== index),
+            });
+        }
+    };
+
+    const updateStep = (index, field, value) => {
+        const updatedSteps = [...newCommand.steps];
+        updatedSteps[index] = { ...updatedSteps[index], [field]: value };
+        setNewCommand({ ...newCommand, steps: updatedSteps });
+    };
+
     const handleAddCommand = (e) => {
         e.preventDefault();
-        if (!newCommand.title.trim() || !newCommand.command.trim()) return;
+        if (!newCommand.title.trim() || !newCommand.steps[0].command.trim()) return;
+
+        // Filter out empty steps
+        const validSteps = newCommand.steps.filter(s => s.command.trim());
 
         dispatch(addCommand({
-            ...newCommand,
+            title: newCommand.title,
+            category: newCommand.category,
+            description: newCommand.description,
             tags: newCommand.tags.split(',').map(t => t.trim()).filter(Boolean),
+            steps: validSteps,
+            command: validSteps.length === 1 ? validSteps[0].command : undefined, // Legacy support
         }));
 
-        setNewCommand({ title: '', command: '', category: 'custom', description: '', tags: '' });
+        setNewCommand({
+            title: '',
+            category: 'custom',
+            description: '',
+            tags: '',
+            steps: [{ command: '', description: '' }],
+        });
         setShowAddForm(false);
     };
 
@@ -79,6 +138,14 @@ export default function CommandSearch() {
         if (confirm('Delete this command?')) {
             dispatch(deleteCommand(id));
         }
+    };
+
+    // Helper to get commands from old format or new format
+    const getCommandSteps = (cmd) => {
+        if (cmd.steps && cmd.steps.length > 0) {
+            return cmd.steps;
+        }
+        return [{ command: cmd.command, description: '' }];
     };
 
     return (
@@ -122,14 +189,7 @@ export default function CommandSearch() {
                             ))}
                         </select>
                     </div>
-                    <input
-                        type="text"
-                        className="glass-input"
-                        placeholder="Command (e.g., git reset --soft HEAD~1)"
-                        value={newCommand.command}
-                        onChange={(e) => setNewCommand({ ...newCommand, command: e.target.value })}
-                        required
-                    />
+
                     <input
                         type="text"
                         className="glass-input"
@@ -137,6 +197,49 @@ export default function CommandSearch() {
                         value={newCommand.description}
                         onChange={(e) => setNewCommand({ ...newCommand, description: e.target.value })}
                     />
+
+                    {/* Steps */}
+                    <div className="steps-section">
+                        <div className="steps-header">
+                            <span className="steps-label">Steps ({newCommand.steps.length})</span>
+                            <button type="button" className="add-step-btn" onClick={addStep}>
+                                + Add Step
+                            </button>
+                        </div>
+
+                        {newCommand.steps.map((step, index) => (
+                            <div key={index} className="step-row">
+                                <span className="step-number">{index + 1}</span>
+                                <div className="step-inputs">
+                                    <input
+                                        type="text"
+                                        className="glass-input step-command"
+                                        placeholder={`Step ${index + 1} command...`}
+                                        value={step.command}
+                                        onChange={(e) => updateStep(index, 'command', e.target.value)}
+                                        required={index === 0}
+                                    />
+                                    <input
+                                        type="text"
+                                        className="glass-input step-desc"
+                                        placeholder="Step description (optional)"
+                                        value={step.description}
+                                        onChange={(e) => updateStep(index, 'description', e.target.value)}
+                                    />
+                                </div>
+                                {newCommand.steps.length > 1 && (
+                                    <button
+                                        type="button"
+                                        className="remove-step-btn"
+                                        onClick={() => removeStep(index)}
+                                    >
+                                        ✕
+                                    </button>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+
                     <input
                         type="text"
                         className="glass-input"
@@ -213,62 +316,99 @@ export default function CommandSearch() {
             {/* Command Cards */}
             <div className="command-grid">
                 {filteredCommands.length > 0 ? (
-                    filteredCommands.map((cmd) => (
-                        <div key={cmd.id} className="command-card glass-card">
-                            <div className="command-card-header">
-                                <h3 className="command-title">{cmd.title}</h3>
-                                <div className="command-actions">
-                                    <button
-                                        className={`favorite-btn ${cmd.isFavorite ? 'active' : ''}`}
-                                        onClick={() => dispatch(toggleFavorite(cmd.id))}
-                                    >
-                                        {cmd.isFavorite ? '★' : '☆'}
-                                    </button>
-                                    <button
-                                        className="delete-btn"
-                                        onClick={() => handleDelete(cmd.id)}
-                                        title="Delete"
-                                    >
-                                        🗑️
-                                    </button>
+                    filteredCommands.map((cmd) => {
+                        const steps = getCommandSteps(cmd);
+                        const isMultiStep = steps.length > 1;
+
+                        return (
+                            <div key={cmd.id} className="command-card glass-card">
+                                <div className="command-card-header">
+                                    <h3 className="command-title">
+                                        {cmd.title}
+                                        {isMultiStep && <span className="steps-badge">{steps.length} steps</span>}
+                                    </h3>
+                                    <div className="command-actions">
+                                        <button
+                                            className={`favorite-btn ${cmd.isFavorite ? 'active' : ''}`}
+                                            onClick={() => dispatch(toggleFavorite(cmd.id))}
+                                        >
+                                            {cmd.isFavorite ? '★' : '☆'}
+                                        </button>
+                                        <button
+                                            className="delete-btn"
+                                            onClick={() => handleDelete(cmd.id)}
+                                            title="Delete"
+                                        >
+                                            🗑️
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <p className="command-description">{cmd.description}</p>
+
+                                {/* Multi-step commands */}
+                                {isMultiStep ? (
+                                    <div className="command-steps">
+                                        {steps.map((step, idx) => (
+                                            <div key={idx} className="command-step">
+                                                <span className="step-index">{idx + 1}</span>
+                                                <div className="step-content">
+                                                    {step.description && (
+                                                        <span className="step-label">{step.description}</span>
+                                                    )}
+                                                    <code className="command-code">{step.command}</code>
+                                                </div>
+                                                <button
+                                                    className={`copy-btn small ${copiedId === cmd.id && copiedStep === idx ? 'copied' : ''}`}
+                                                    onClick={() => handleCopy(step.command, cmd.id, idx)}
+                                                >
+                                                    {copiedId === cmd.id && copiedStep === idx ? '✓' : '📋'}
+                                                </button>
+                                            </div>
+                                        ))}
+                                        <button
+                                            className={`copy-all-btn ${copiedId === cmd.id && copiedStep === 'all' ? 'copied' : ''}`}
+                                            onClick={() => handleCopyAll(steps, cmd.id)}
+                                        >
+                                            {copiedId === cmd.id && copiedStep === 'all' ? '✓ Copied All!' : '📋 Copy All Steps'}
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <div className="command-code-container">
+                                        <code className="command-code">{steps[0].command}</code>
+                                        <button
+                                            className={`copy-btn ${copiedId === cmd.id ? 'copied' : ''}`}
+                                            onClick={() => handleCopy(steps[0].command, cmd.id)}
+                                        >
+                                            {copiedId === cmd.id ? (
+                                                <>
+                                                    <span className="copy-icon">✓</span>
+                                                    Copied!
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <span className="copy-icon">📋</span>
+                                                    Copy
+                                                </>
+                                            )}
+                                        </button>
+                                    </div>
+                                )}
+
+                                <div className="command-tags">
+                                    {cmd.tags.map((tag, idx) => (
+                                        <span key={idx} className="command-tag">
+                                            #{tag}
+                                        </span>
+                                    ))}
+                                </div>
+
+                                <div className="command-category-badge">
+                                    {CATEGORIES.find((c) => c.id === cmd.category)?.icon} {cmd.category}
                                 </div>
                             </div>
-
-                            <p className="command-description">{cmd.description}</p>
-
-                            <div className="command-code-container">
-                                <code className="command-code">{cmd.command}</code>
-                                <button
-                                    className={`copy-btn ${copiedId === cmd.id ? 'copied' : ''}`}
-                                    onClick={() => handleCopy(cmd.command, cmd.id)}
-                                >
-                                    {copiedId === cmd.id ? (
-                                        <>
-                                            <span className="copy-icon">✓</span>
-                                            Copied!
-                                        </>
-                                    ) : (
-                                        <>
-                                            <span className="copy-icon">📋</span>
-                                            Copy
-                                        </>
-                                    )}
-                                </button>
-                            </div>
-
-                            <div className="command-tags">
-                                {cmd.tags.map((tag, idx) => (
-                                    <span key={idx} className="command-tag">
-                                        #{tag}
-                                    </span>
-                                ))}
-                            </div>
-
-                            <div className="command-category-badge">
-                                {CATEGORIES.find((c) => c.id === cmd.category)?.icon} {cmd.category}
-                            </div>
-                        </div>
-                    ))
+                        );
+                    })
                 ) : (
                     <div className="no-results">
                         <div className="no-results-icon">🔍</div>
