@@ -16,6 +16,8 @@ import DevHints from './components/DevHints/DevHints';
 import UserProfile from './components/UserProfile/UserProfile';
 import ProgressStats from './components/ProgressStats/ProgressStats';
 import TodoList from './components/TodoList/TodoList';
+import MusicPlayer from './components/MusicPlayer/MusicPlayer';
+import Settings from './components/Settings/Settings';
 
 import './App.css';
 
@@ -48,6 +50,10 @@ function Dashboard() {
         return <ProgressStats />;
       case 'todos':
         return <TodoList />;
+      case 'music':
+        return <MusicPlayer />;
+      case 'settings':
+        return <Settings />;
       case 'dashboard':
       default:
         return (

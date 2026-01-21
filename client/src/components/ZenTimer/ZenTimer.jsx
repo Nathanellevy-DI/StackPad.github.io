@@ -7,20 +7,6 @@ const PRESET_MODES = {
     longBreak: { label: 'Long Break', duration: 15, color: 'var(--accent-cyan)' },
 };
 
-// Curated Spotify playlists for focus/work
-const SPOTIFY_PLAYLISTS = [
-    { id: '0vvXsWCC9xrXsKd4FyS8kM', label: 'Deep Focus', icon: '🧠' },
-    { id: '37i9dQZF1DWZeKCadgRdKQ', label: 'Lo-Fi Beats', icon: '🎵' },
-    { id: '37i9dQZF1DX5trt9i14X7j', label: 'Coding Mode', icon: '💻' },
-    { id: '37i9dQZF1DWWQRwui0ExPn', label: 'Chill Lofi', icon: '☕' },
-];
-
-// Apple Music playlists (using embed)
-const APPLE_PLAYLISTS = [
-    { id: 'pl.9722dd0c7e8b4746b9e2ec5e7b7c7a0a', label: 'Pure Focus', icon: '🎯' },
-    { id: 'pl.3f29e145a1ee42b19be6dd6d0bbb0c70', label: 'Lo-Fi Chill', icon: '🌙' },
-];
-
 export default function ZenTimer() {
     const [mode, setMode] = useState('work');
     const [customMinutes, setCustomMinutes] = useState(25);
@@ -28,9 +14,6 @@ export default function ZenTimer() {
     const [timeLeft, setTimeLeft] = useState(25 * 60);
     const [isRunning, setIsRunning] = useState(false);
     const [sessions, setSessions] = useState(0);
-    const [showMusic, setShowMusic] = useState(false);
-    const [musicService, setMusicService] = useState('spotify');
-    const [selectedPlaylist, setSelectedPlaylist] = useState(null);
 
     const intervalRef = useRef(null);
 
@@ -100,8 +83,6 @@ export default function ZenTimer() {
 
     const circumference = 2 * Math.PI * 120;
     const strokeDashoffset = circumference - (progress / 100) * circumference;
-
-    const currentPlaylists = musicService === 'spotify' ? SPOTIFY_PLAYLISTS : APPLE_PLAYLISTS;
 
     return (
         <div className="zen-timer">
@@ -192,79 +173,9 @@ export default function ZenTimer() {
                     </button>
                 </div>
 
-                {/* Music Integration */}
-                <div className="music-section">
-                    <button
-                        className="music-toggle glass-button"
-                        onClick={() => setShowMusic(!showMusic)}
-                    >
-                        🎵 {showMusic ? 'Hide' : 'Show'} Music Player
-                    </button>
-
-                    {showMusic && (
-                        <div className="music-player">
-                            {/* Service Tabs */}
-                            <div className="music-service-tabs">
-                                <button
-                                    className={`service-tab ${musicService === 'spotify' ? 'active' : ''}`}
-                                    onClick={() => { setMusicService('spotify'); setSelectedPlaylist(null); }}
-                                >
-                                    <span className="service-icon">🟢</span> Spotify
-                                </button>
-                                <button
-                                    className={`service-tab ${musicService === 'apple' ? 'active' : ''}`}
-                                    onClick={() => { setMusicService('apple'); setSelectedPlaylist(null); }}
-                                >
-                                    <span className="service-icon">🍎</span> Apple Music
-                                </button>
-                            </div>
-
-                            {/* Playlist Options */}
-                            <div className="playlist-grid">
-                                {currentPlaylists.map((playlist) => (
-                                    <button
-                                        key={playlist.id}
-                                        className={`playlist-btn ${selectedPlaylist?.id === playlist.id ? 'active' : ''}`}
-                                        onClick={() => setSelectedPlaylist(playlist)}
-                                    >
-                                        <span>{playlist.icon}</span>
-                                        <span>{playlist.label}</span>
-                                    </button>
-                                ))}
-                            </div>
-
-                            {/* Embedded Player */}
-                            {selectedPlaylist && (
-                                <div className="music-embed">
-                                    {musicService === 'spotify' ? (
-                                        <iframe
-                                            src={`https://open.spotify.com/embed/playlist/${selectedPlaylist.id}?utm_source=generator&theme=0`}
-                                            width="100%"
-                                            height="152"
-                                            frameBorder="0"
-                                            allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-                                            loading="lazy"
-                                            title={selectedPlaylist.label}
-                                        />
-                                    ) : (
-                                        <iframe
-                                            src={`https://embed.music.apple.com/us/playlist/${selectedPlaylist.id}`}
-                                            width="100%"
-                                            height="175"
-                                            frameBorder="0"
-                                            allow="autoplay *; encrypted-media *; fullscreen *"
-                                            sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-top-navigation-by-user-activation"
-                                            title={selectedPlaylist.label}
-                                        />
-                                    )}
-                                </div>
-                            )}
-
-                            {!selectedPlaylist && (
-                                <p className="music-hint">Select a playlist above to start playing</p>
-                            )}
-                        </div>
-                    )}
+                {/* Music Hint */}
+                <div className="music-hint-box">
+                    <p>🎵 Looking for music? Check out the <strong>Music</strong> tab in the sidebar!</p>
                 </div>
             </div>
         </div>

@@ -2,10 +2,10 @@ import './MobileNav.css';
 
 const NAV_ITEMS = [
     { id: 'dashboard', label: 'Home', icon: '🏠' },
-    { id: 'commands', label: 'Commands', icon: '⚡' },
-    { id: 'logs', label: 'Check-In', icon: '📋' },
-    { id: 'progress', label: 'Progress', icon: '📊' },
-    { id: 'notes', label: 'Notes', icon: '📌' },
+    { id: 'todos', label: 'Tasks', icon: '✅' },
+    { id: 'music', label: 'Music', icon: '🎵' },
+    { id: 'progress', label: 'Stats', icon: '📊' },
+    { id: 'settings', label: 'Settings', icon: '⚙️' },
 ];
 
 export default function MobileNav({ activeSection, onSectionChange }) {

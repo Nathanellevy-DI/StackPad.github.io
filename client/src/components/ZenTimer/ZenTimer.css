@@ -148,7 +148,6 @@
     display: flex;
     justify-content: center;
     gap: var(--spacing-md);
-    margin-bottom: var(--spacing-xl);
 }
 
 .control-btn {
@@ -179,106 +178,23 @@
     opacity: 0.9;
 }
 
-/* Music Section */
-.music-section {
-    margin-top: var(--spacing-lg);
-}
-
-.music-toggle {
-    margin-bottom: var(--spacing-md);
-}
-
-.music-player {
-    background: rgba(0, 0, 0, 0.2);
-    border-radius: var(--radius-lg);
-    padding: var(--spacing-lg);
-    text-align: left;
-}
-
-/* Service Tabs */
-.music-service-tabs {
-    display: flex;
-    gap: var(--spacing-sm);
-    margin-bottom: var(--spacing-lg);
-}
-
-.service-tab {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--spacing-sm);
-    padding: var(--spacing-md);
-    background: rgba(0, 0, 0, 0.2);
-    border: 1px solid var(--glass-border);
-    border-radius: var(--radius-md);
-    color: var(--text-secondary);
-    cursor: pointer;
-    transition: all var(--transition-fast);
-}
-
-.service-tab:hover {
-    background: rgba(0, 0, 0, 0.3);
-}
-
-.service-tab.active {
-    background: var(--glass-bg);
-    border-color: var(--accent-primary);
-    color: var(--text-primary);
-}
-
-.service-icon {
-    font-size: 1.125rem;
-}
-
-/* Playlist Grid */
-.playlist-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: var(--spacing-sm);
-    margin-bottom: var(--spacing-lg);
-}
-
-.playlist-btn {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-sm);
+/* Music Hint */
+.music-hint-box {
+    margin-top: var(--spacing-xl);
     padding: var(--spacing-md);
     background: rgba(255, 255, 255, 0.05);
-    border: 1px solid var(--glass-border);
     border-radius: var(--radius-md);
-    color: var(--text-secondary);
-    cursor: pointer;
-    transition: all var(--transition-fast);
-    font-size: 0.8125rem;
-}
-
-.playlist-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: var(--text-primary);
-}
-
-.playlist-btn.active {
-    background: var(--accent-primary);
-    border-color: var(--accent-primary);
-    color: var(--bg-primary);
-}
-
-/* Music Embed */
-.music-embed {
-    border-radius: var(--radius-md);
-    overflow: hidden;
-}
-
-.music-embed iframe {
-    border-radius: var(--radius-md);
-}
-
-.music-hint {
+    border: 1px dashed var(--glass-border);
     text-align: center;
-    color: var(--text-muted);
+}
+
+.music-hint-box p {
     font-size: 0.875rem;
-    padding: var(--spacing-lg);
+    color: var(--text-muted);
+}
+
+.music-hint-box strong {
+    color: var(--accent-primary);
 }
 
 /* Responsive */
@@ -290,9 +206,5 @@
 
     .timer-time {
         font-size: 2rem;
-    }
-
-    .playlist-grid {
-        grid-template-columns: 1fr;
     }
 }
