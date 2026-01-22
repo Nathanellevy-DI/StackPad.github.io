@@ -87,87 +87,25 @@
     color: var(--bg-primary);
 }
 
-/* Music Service Options */
-.music-service-options {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: var(--spacing-md);
-    margin-bottom: var(--spacing-lg);
-}
-
-.service-option {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--spacing-sm);
-    padding: var(--spacing-lg);
-    background: rgba(0, 0, 0, 0.2);
-    border: 2px solid var(--glass-border);
-    border-radius: var(--radius-lg);
-    cursor: pointer;
-    transition: all var(--transition-fast);
+/* Import Status */
+.import-status {
+    margin-top: var(--spacing-md);
+    padding: var(--spacing-md);
+    border-radius: var(--radius-md);
+    font-size: 0.875rem;
     text-align: center;
 }
 
-.service-option:hover {
-    background: rgba(0, 0, 0, 0.3);
-    border-color: var(--accent-primary);
+.import-status.success {
+    background: rgba(34, 197, 94, 0.2);
+    border: 1px solid rgba(34, 197, 94, 0.5);
+    color: #22c55e;
 }
 
-.service-option.active {
-    background: rgba(172, 186, 196, 0.15);
-    border-color: var(--accent-primary);
-}
-
-.service-option .service-icon {
-    font-size: 2rem;
-}
-
-.service-option .service-name {
-    font-size: 1rem;
-    font-weight: 600;
-}
-
-.service-option .service-desc {
-    font-size: 0.75rem;
-    color: var(--text-muted);
-}
-
-/* Music Links */
-.music-links {
-    padding-top: var(--spacing-md);
-    border-top: 1px solid var(--glass-border);
-}
-
-.links-label {
-    font-size: 0.8125rem;
-    color: var(--text-muted);
-    margin-bottom: var(--spacing-sm);
-}
-
-.link-buttons {
-    display: flex;
-    gap: var(--spacing-sm);
-    flex-wrap: wrap;
-}
-
-.link-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--spacing-xs);
-    padding: var(--spacing-xs) var(--spacing-md);
-    background: rgba(0, 0, 0, 0.2);
-    border: 1px solid var(--glass-border);
-    border-radius: var(--radius-full);
-    color: var(--text-secondary);
-    text-decoration: none;
-    font-size: 0.75rem;
-    transition: all var(--transition-fast);
-}
-
-.link-btn:hover {
-    background: rgba(0, 0, 0, 0.3);
-    color: var(--text-primary);
+.import-status.error {
+    background: rgba(239, 68, 68, 0.2);
+    border: 1px solid rgba(239, 68, 68, 0.5);
+    color: #ef4444;
 }
 
 /* Danger Button */
