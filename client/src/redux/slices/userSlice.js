@@ -9,6 +9,7 @@ const getStoredUser = () => {
         name: 'Developer',
         email: '',
         avatarSeed: 'developer',
+        linkedinUrl: '',
     };
 };
 

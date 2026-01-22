@@ -95,6 +95,16 @@
     background: rgba(255, 255, 255, 0.1);
 }
 
+.header-icon-btn.disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.header-icon-btn.disabled:hover {
+    background: transparent;
+    color: var(--text-secondary);
+}
+
 /* Theme Toggle */
 .theme-toggle {
     position: relative;

@@ -13,14 +13,19 @@ export default function WorkspaceSwitcher() {
     const [isOpen, setIsOpen] = useState(false);
     const [showNew, setShowNew] = useState(false);
     const [newName, setNewName] = useState('');
+    const [newGithubUrl, setNewGithubUrl] = useState('');
 
     const currentWorkspace = workspaces.find(w => w.id === currentId);
 
     const handleCreate = (e) => {
         e.preventDefault();
         if (!newName.trim()) return;
-        dispatch(createWorkspace({ name: newName.trim() }));
+        dispatch(createWorkspace({
+            name: newName.trim(),
+            githubUrl: newGithubUrl.trim(),
+        }));
         setNewName('');
+        setNewGithubUrl('');
         setShowNew(false);
     };
 
@@ -69,6 +74,13 @@ export default function WorkspaceSwitcher() {
                                 onChange={(e) => setNewName(e.target.value)}
                                 autoFocus
                             />
+                            <input
+                                type="url"
+                                className="glass-input"
+                                placeholder="GitHub repo URL (optional)"
+                                value={newGithubUrl}
+                                onChange={(e) => setNewGithubUrl(e.target.value)}
+                            />
                             <button type="submit" className="glass-button primary">
                                 Create
                             </button>
@@ -86,6 +98,7 @@ export default function WorkspaceSwitcher() {
                                 <span className="ws-name">{ws.name}</span>
                                 <div className="ws-meta">
                                     <span className="ws-notes">{ws.notes?.length || 0} notes</span>
+                                    {ws.githubUrl && <span className="ws-github">🔗</span>}
                                 </div>
                                 {workspaces.length > 1 && (
                                     <button

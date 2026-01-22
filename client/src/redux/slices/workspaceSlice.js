@@ -38,6 +38,7 @@ const workspaceSlice = createSlice({
             const newWorkspace = {
                 id: Date.now().toString(),
                 name: action.payload.name,
+                githubUrl: action.payload.githubUrl || '',
                 notes: [],
                 logs: [],
                 createdAt: new Date().toISOString(),

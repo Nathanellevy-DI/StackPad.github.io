@@ -72,6 +72,18 @@ export default function UserProfile() {
                     </div>
 
                     <div className="form-group">
+                        <label htmlFor="linkedinUrl">LinkedIn URL</label>
+                        <input
+                            type="url"
+                            id="linkedinUrl"
+                            className="glass-input"
+                            value={formData.linkedinUrl || ''}
+                            onChange={(e) => setFormData({ ...formData, linkedinUrl: e.target.value })}
+                            placeholder="https://linkedin.com/in/your-profile"
+                        />
+                    </div>
+
+                    <div className="form-group">
                         <label htmlFor="email">Email (optional)</label>
                         <input
                             type="email"
