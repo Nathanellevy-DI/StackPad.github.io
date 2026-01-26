@@ -1,3 +1,19 @@
+/**
+ * CommandSearch.jsx - Developer Command Vault
+ * 
+ * A searchable library of terminal/coding commands.
+ * Allows developers to save, organize, and quickly copy often-used commands.
+ * 
+ * Features:
+ * - List view of commands with copy buttons
+ * - Search by title, command, tags, or description
+ * - Filter by category and favorites
+ * - Multi-step commands (e.g., "git add .", "git commit", "git push")
+ * - Add/Edit/Delete functionality
+ * 
+ * Uses 'commandsSlice' in Redux for state management.
+ */
+
 import { useState, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import {
@@ -10,6 +26,7 @@ import {
 } from '../../redux/slices/commandsSlice';
 import './CommandSearch.css';
 
+// Predefined categories with icons for filtering
 const CATEGORIES = [
     { id: 'all', label: 'All', icon: '📦' },
     { id: 'git', label: 'Git', icon: '🔀' },
@@ -23,45 +40,67 @@ const CATEGORIES = [
 
 export default function CommandSearch() {
     const dispatch = useDispatch();
+
+    // Get command data and filter state from Redux
     const { commands, searchQuery, selectedCategory, showFavoritesOnly } = useSelector(
         (state) => state.commands
     );
+
+    // UI state for clipboard feedback
     const [copiedId, setCopiedId] = useState(null);
     const [copiedStep, setCopiedStep] = useState(null);
+
+    // Toggle for the "Add Command" form
     const [showAddForm, setShowAddForm] = useState(false);
+
+    // Form state for new command creation
     const [newCommand, setNewCommand] = useState({
         title: '',
         category: 'custom',
         description: '',
         tags: '',
-        steps: [{ command: '', description: '' }],
+        steps: [{ command: '', description: '' }], // Starts with one empty step
     });
 
-    // Filter commands
+    /**
+     * filteredCommands - Efficiently filters the command list
+     * based on search text, category, and favorites only toggle.
+     * Memoized to prevent re-calculation on every render.
+     */
     const filteredCommands = useMemo(() => {
         return commands.filter((cmd) => {
+            // Combine all step commands into one string for easier searching
             const commandText = cmd.steps
                 ? cmd.steps.map(s => s.command).join(' ')
                 : cmd.command || '';
 
+            // Check if search query matches any field
             const matchesSearch =
                 cmd.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 commandText.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 cmd.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 cmd.tags.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase()));
 
+            // Check category filter
             const matchesCategory = selectedCategory === 'all' || cmd.category === selectedCategory;
+
+            // Check favorites filter
             const matchesFavorites = !showFavoritesOnly || cmd.isFavorite;
 
             return matchesSearch && matchesCategory && matchesFavorites;
         });
     }, [commands, searchQuery, selectedCategory, showFavoritesOnly]);
 
+    /**
+     * handleCopy - Copies a single command string to clipboard
+     * Shows a temporary success indicator
+     */
     const handleCopy = async (command, id, stepIndex = null) => {
         try {
             await navigator.clipboard.writeText(command);
             setCopiedId(id);
             setCopiedStep(stepIndex);
+            // Reset "Copied!" state after 2 seconds
             setTimeout(() => {
                 setCopiedId(null);
                 setCopiedStep(null);
@@ -71,6 +110,10 @@ export default function CommandSearch() {
         }
     };
 
+    /**
+     * handleCopyAll - Copies all steps of a multi-step command
+     * Joined by newlines
+     */
     const handleCopyAll = async (steps, id) => {
         try {
             const allCommands = steps.map(s => s.command).join('\n');
@@ -86,6 +129,7 @@ export default function CommandSearch() {
         }
     };
 
+    // Form helper: Add a new empty step
     const addStep = () => {
         setNewCommand({
             ...newCommand,
@@ -93,6 +137,7 @@ export default function CommandSearch() {
         });
     };
 
+    // Form helper: Remove a step (prevents removing the last one)
     const removeStep = (index) => {
         if (newCommand.steps.length > 1) {
             setNewCommand({
@@ -102,28 +147,36 @@ export default function CommandSearch() {
         }
     };
 
+    // Form helper: Update specific field in a step
     const updateStep = (index, field, value) => {
         const updatedSteps = [...newCommand.steps];
         updatedSteps[index] = { ...updatedSteps[index], [field]: value };
         setNewCommand({ ...newCommand, steps: updatedSteps });
     };
 
+    /**
+     * handleAddCommand - Validates and dispatches new command
+     */
     const handleAddCommand = (e) => {
         e.preventDefault();
+        // Simple validation: must have title and at least one command
         if (!newCommand.title.trim() || !newCommand.steps[0].command.trim()) return;
 
-        // Filter out empty steps
+        // Filter out any empty steps before saving
         const validSteps = newCommand.steps.filter(s => s.command.trim());
 
         dispatch(addCommand({
             title: newCommand.title,
             category: newCommand.category,
             description: newCommand.description,
+            // Process tags string into array
             tags: newCommand.tags.split(',').map(t => t.trim()).filter(Boolean),
             steps: validSteps,
-            command: validSteps.length === 1 ? validSteps[0].command : undefined, // Legacy support
+            // Backward compatibility for single-command structure
+            command: validSteps.length === 1 ? validSteps[0].command : undefined,
         }));
 
+        // Reset form
         setNewCommand({
             title: '',
             category: 'custom',
@@ -134,23 +187,30 @@ export default function CommandSearch() {
         setShowAddForm(false);
     };
 
+    /**
+     * handleDelete - Deletes a command with confirmation
+     */
     const handleDelete = (id) => {
         if (confirm('Delete this command?')) {
             dispatch(deleteCommand(id));
         }
     };
 
-    // Helper to get commands from old format or new format
+    /**
+     * getCommandSteps - Normalizes command structure
+     * Handles both new multi-step format and old single-string format
+     */
     const getCommandSteps = (cmd) => {
         if (cmd.steps && cmd.steps.length > 0) {
             return cmd.steps;
         }
+        // Convert old single command format to step array
         return [{ command: cmd.command, description: '' }];
     };
 
     return (
         <div className="command-search">
-            {/* Header */}
+            {/* Header section with title and Add button */}
             <div className="command-search-header">
                 <div>
                     <h2 className="command-search-title">
@@ -167,7 +227,7 @@ export default function CommandSearch() {
                 </button>
             </div>
 
-            {/* Add Command Form */}
+            {/* ====== ADD COMMAND FORM ====== */}
             {showAddForm && (
                 <form className="add-command-form glass-card" onSubmit={handleAddCommand}>
                     <div className="form-row">
@@ -198,7 +258,7 @@ export default function CommandSearch() {
                         onChange={(e) => setNewCommand({ ...newCommand, description: e.target.value })}
                     />
 
-                    {/* Steps */}
+                    {/* Dynamic Steps Section */}
                     <div className="steps-section">
                         <div className="steps-header">
                             <span className="steps-label">Steps ({newCommand.steps.length})</span>
@@ -253,7 +313,7 @@ export default function CommandSearch() {
                 </form>
             )}
 
-            {/* Search Input */}
+            {/* ====== SEARCH AND FILTER CONTROLS ====== */}
             <div className="search-container">
                 <div className="search-input-wrapper">
                     <svg
@@ -275,6 +335,7 @@ export default function CommandSearch() {
                         value={searchQuery}
                         onChange={(e) => dispatch(setSearchQuery(e.target.value))}
                     />
+                    {/* Clear search button only shown when typing */}
                     {searchQuery && (
                         <button
                             className="clear-search"
@@ -294,7 +355,7 @@ export default function CommandSearch() {
                 </button>
             </div>
 
-            {/* Category Tabs */}
+            {/* Category selection tabs */}
             <div className="category-tabs">
                 {CATEGORIES.map((cat) => (
                     <button
@@ -308,12 +369,12 @@ export default function CommandSearch() {
                 ))}
             </div>
 
-            {/* Results Count */}
+            {/* Filter results summary */}
             <div className="results-info">
                 <span className="results-count">{filteredCommands.length}</span> commands found
             </div>
 
-            {/* Command Cards */}
+            {/* ====== RESULTS GRID ====== */}
             <div className="command-grid">
                 {filteredCommands.length > 0 ? (
                     filteredCommands.map((cmd) => {
@@ -346,7 +407,7 @@ export default function CommandSearch() {
 
                                 <p className="command-description">{cmd.description}</p>
 
-                                {/* Multi-step commands */}
+                                {/* Render commands based on step count */}
                                 {isMultiStep ? (
                                     <div className="command-steps">
                                         {steps.map((step, idx) => (
@@ -366,6 +427,7 @@ export default function CommandSearch() {
                                                 </button>
                                             </div>
                                         ))}
+                                        {/* Copy All button for multi-step commands */}
                                         <button
                                             className={`copy-all-btn ${copiedId === cmd.id && copiedStep === 'all' ? 'copied' : ''}`}
                                             onClick={() => handleCopyAll(steps, cmd.id)}
@@ -374,6 +436,7 @@ export default function CommandSearch() {
                                         </button>
                                     </div>
                                 ) : (
+                                    // Single step layout
                                     <div className="command-code-container">
                                         <code className="command-code">{steps[0].command}</code>
                                         <button
@@ -410,6 +473,7 @@ export default function CommandSearch() {
                         );
                     })
                 ) : (
+                    // Empty search state
                     <div className="no-results">
                         <div className="no-results-icon">🔍</div>
                         <h3>No commands found</h3>

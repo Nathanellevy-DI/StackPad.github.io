@@ -1,8 +1,23 @@
+/**
+ * SystemLogs.jsx - Daily Check-In/Log Component
+ * 
+ * Allows users to log their daily progress, obstacles, and learnings.
+ * Acts as a developer journal to track work history.
+ * 
+ * Features:
+ * - Create new logs with type (Progress, Gotcha, Error, Tip)
+ * - Track hours spent per task (optional)
+ * - View history of logs
+ * - Daily stats header showing hours logged today vs total
+ * - Logs are persisted per workspace
+ */
+
 import { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { selectCurrentWorkspace, updateLogs } from '../../redux/slices/workspaceSlice';
 import './SystemLogs.css';
 
+// Log category definitions
 const LOG_TYPES = [
     { id: 'progress', label: 'Progress', icon: '🚀', color: 'var(--accent-green)' },
     { id: 'gotcha', label: 'Gotcha', icon: '💡', color: 'var(--accent-orange)' },
@@ -15,16 +30,19 @@ export default function SystemLogs() {
     const workspace = useSelector(selectCurrentWorkspace);
     const savedLogs = workspace?.logs || [];
 
+    // Local state for logs and UI
     const [logs, setLogs] = useState(savedLogs);
     const [showModal, setShowModal] = useState(false);
+
+    // Form state for new log entry
     const [newLog, setNewLog] = useState({ type: 'progress', content: '', hours: '' });
 
-    // Sync with Redux when workspace changes
+    // Sync from Redux when workspace changes
     useEffect(() => {
         setLogs(savedLogs);
     }, [workspace?.id]);
 
-    // Save to Redux whenever logs change
+    // Save to Redux when logs change (debounced)
     useEffect(() => {
         const timeout = setTimeout(() => {
             dispatch(updateLogs(logs));
@@ -44,8 +62,8 @@ export default function SystemLogs() {
             timestamp: new Date().toISOString(),
         };
 
-        setLogs([log, ...logs]);
-        setNewLog({ type: 'progress', content: '', hours: '' });
+        setLogs([log, ...logs]); // Add new log to top
+        setNewLog({ type: 'progress', content: '', hours: '' }); // Reset form
         setShowModal(false);
     };
 
@@ -53,6 +71,7 @@ export default function SystemLogs() {
         setLogs(logs.filter(log => log.id !== id));
     };
 
+    // Helper to format "time ago" string
     const formatDate = (isoString) => {
         const date = new Date(isoString);
         const now = new Date();
@@ -64,17 +83,26 @@ export default function SystemLogs() {
         return date.toLocaleDateString();
     };
 
-    // Calculate stats
+    // ============================================
+    // STATS CALCULATION
+    // ============================================
+
+    // Total hours logged ever
     const totalHours = logs.reduce((sum, log) => sum + (log.hours || 0), 0);
+
+    // Logs from today only
     const todayLogs = logs.filter(l => {
         const today = new Date();
         const logDate = new Date(l.timestamp);
         return logDate.toDateString() === today.toDateString();
     });
+
+    // Total hours logged today
     const todayHours = todayLogs.reduce((sum, log) => sum + (log.hours || 0), 0);
 
     return (
         <div className="system-logs">
+            {/* Header */}
             <div className="logs-header">
                 <div>
                     <h2 className="logs-title">
@@ -88,7 +116,7 @@ export default function SystemLogs() {
                 </button>
             </div>
 
-            {/* Stats Overview */}
+            {/* ====== STATS OVERVIEW ====== */}
             <div className="stats-row">
                 <div className="mini-stat">
                     <span className="mini-stat-icon">📅</span>
@@ -120,7 +148,7 @@ export default function SystemLogs() {
                 </div>
             </div>
 
-            {/* Logs List */}
+            {/* ====== LOGS LIST ====== */}
             <div className="logs-list">
                 {logs.length > 0 ? (
                     logs.map((log) => {
@@ -149,6 +177,7 @@ export default function SystemLogs() {
                         );
                     })
                 ) : (
+                    // Empty state
                     <div className="no-logs">
                         <span className="no-logs-icon">📝</span>
                         <h3>No check-ins yet</h3>
@@ -157,7 +186,7 @@ export default function SystemLogs() {
                 )}
             </div>
 
-            {/* Add Check-In Modal */}
+            {/* ====== NEW CHECK-IN MODAL ====== */}
             {showModal && (
                 <div className="modal-overlay" onClick={() => setShowModal(false)}>
                     <div className="modal glass-card" onClick={(e) => e.stopPropagation()}>
@@ -170,6 +199,7 @@ export default function SystemLogs() {
                             <div className="modal-body">
                                 <div className="form-group">
                                     <label>Type</label>
+                                    {/* Type selector buttons */}
                                     <div className="log-type-selector">
                                         {LOG_TYPES.map((type) => (
                                             <button

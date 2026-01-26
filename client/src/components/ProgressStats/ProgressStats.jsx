@@ -1,3 +1,17 @@
+/**
+ * ProgressStats.jsx - Analytics & Gamification Dashboard
+ * 
+ * Visualizes the user's productivity data from daily check-ins (SystemLogs).
+ * Calculates streaks, total hours, and activity breakdown.
+ * 
+ * Features:
+ * - Weekly activity chart (bar chart)
+ * - Streak calculation (consecutive days with logs)
+ * - Activity breakdown by log type (Progress, Gotcha, Error, Tip)
+ * - Share functionality for social media (LinkedIn, Twitter)
+ * - Copyable markdown summary for GitHub READMEs
+ */
+
 import { useState, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { selectCurrentWorkspace } from '../../redux/slices/workspaceSlice';
@@ -6,28 +20,37 @@ import './ProgressStats.css';
 export default function ProgressStats() {
     const workspace = useSelector(selectCurrentWorkspace);
     const logs = workspace?.logs || [];
+
+    // UI state for share modal and copy feedback
     const [copied, setCopied] = useState(false);
     const [showShareModal, setShowShareModal] = useState(false);
 
-    // Calculate stats
+    /**
+     * stats - Memoized calculation of all analytics
+     * Re-runs only when logs change
+     */
     const stats = useMemo(() => {
         const now = new Date();
         const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+        // Calculate start of last 7 days
         const weekStart = new Date(todayStart);
         weekStart.setDate(weekStart.getDate() - 7);
 
+        // Filter logs by date range
         const todayLogs = logs.filter(l => new Date(l.timestamp) >= todayStart);
         const weekLogs = logs.filter(l => new Date(l.timestamp) >= weekStart);
 
+        // Group by log type (progress, gotcha, etc.)
         const byType = logs.reduce((acc, log) => {
             acc[log.type] = (acc[log.type] || 0) + 1;
             return acc;
         }, {});
 
-        // Total hours
+        // Calculate total hours spent
         const totalHours = logs.reduce((sum, log) => sum + (log.hours || 0), 0);
 
-        // Last 7 days activity
+        // Calculate daily activity for the last 7 days (for bar chart)
         const dailyActivity = [];
         for (let i = 6; i >= 0; i--) {
             const date = new Date(todayStart);
@@ -57,6 +80,10 @@ export default function ProgressStats() {
         };
     }, [logs]);
 
+    /**
+     * calculateStreak - Counts consecutive days with at least one log
+     * Starting from today and going backwards
+     */
     function calculateStreak(logs) {
         if (logs.length === 0) return 0;
 
@@ -69,6 +96,7 @@ export default function ProgressStats() {
             const dayEnd = new Date(checkDate);
             dayEnd.setDate(dayEnd.getDate() + 1);
 
+            // Check if any log exists for this specific day
             const hasLog = logs.some(l => {
                 const d = new Date(l.timestamp);
                 return d >= checkDate && d < dayEnd;
@@ -76,15 +104,18 @@ export default function ProgressStats() {
 
             if (hasLog) {
                 streak++;
-                checkDate.setDate(checkDate.getDate() - 1);
+                checkDate.setDate(checkDate.getDate() - 1); // Go back one day
             } else {
-                break;
+                break; // Streak broken
             }
         }
 
         return streak;
     }
 
+    /**
+     * generateShareText - Creates a social media friendly summary
+     */
     const generateShareText = () => {
         return `🚀 My Developer Progress on ${workspace?.name || 'StackPad'}!
 
@@ -97,6 +128,9 @@ export default function ProgressStats() {
 #Developer #Productivity #Coding #100DaysOfCode`;
     };
 
+    /**
+     * generateMarkdown - Creates a markdown table for GitHub/GitLab
+     */
     const generateMarkdown = () => {
         return `## 📊 My Developer Progress
 
@@ -113,6 +147,9 @@ export default function ProgressStats() {
 *Generated with StackPad*`;
     };
 
+    /**
+     * copyToClipboard - Copy helper function
+     */
     const copyToClipboard = async (text) => {
         try {
             await navigator.clipboard.writeText(text);
@@ -123,6 +160,7 @@ export default function ProgressStats() {
         }
     };
 
+    // Social sharing helpers
     const shareToLinkedIn = () => {
         const text = encodeURIComponent(generateShareText());
         window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.href)}&summary=${text}`, '_blank');
@@ -133,10 +171,12 @@ export default function ProgressStats() {
         window.open(`https://twitter.com/intent/tweet?text=${text}`, '_blank');
     };
 
+    // Find max activity count to scale the bar chart
     const maxActivity = Math.max(...stats.dailyActivity.map(d => d.count), 1);
 
     return (
         <div className="progress-stats">
+            {/* Header */}
             <div className="stats-header">
                 <div>
                     <h2 className="stats-title">
@@ -153,7 +193,7 @@ export default function ProgressStats() {
                 </button>
             </div>
 
-            {/* Stats Cards */}
+            {/* ====== STATS CARDS ====== */}
             <div className="stats-cards">
                 <div className="stat-card glass-card">
                     <span className="stat-icon">🔥</span>
@@ -185,7 +225,7 @@ export default function ProgressStats() {
                 </div>
             </div>
 
-            {/* Activity Chart */}
+            {/* ====== ACTIVITY CHART ====== */}
             <div className="chart-section glass-card">
                 <h3 className="chart-title">Weekly Activity</h3>
                 <div className="bar-chart">
@@ -196,6 +236,7 @@ export default function ProgressStats() {
                                     className="bar"
                                     style={{ height: `${(day.count / maxActivity) * 100}%` }}
                                 >
+                                    {/* Show count on hover/bars */}
                                     <span className="bar-value">{day.count}</span>
                                 </div>
                             </div>
@@ -205,7 +246,7 @@ export default function ProgressStats() {
                 </div>
             </div>
 
-            {/* Log Types Breakdown */}
+            {/* ====== BREAKDOWN SECTION ====== */}
             <div className="breakdown-section glass-card">
                 <h3 className="chart-title">Log Breakdown</h3>
                 <div className="breakdown-grid">
@@ -232,7 +273,7 @@ export default function ProgressStats() {
                 </div>
             </div>
 
-            {/* Recent Activity */}
+            {/* ====== RECENT ACTIVITY ====== */}
             <div className="recent-section glass-card">
                 <h3 className="chart-title">Recent Check-ins</h3>
                 <div className="recent-list">
@@ -253,7 +294,7 @@ export default function ProgressStats() {
                 </div>
             </div>
 
-            {/* Share Modal */}
+            {/* ====== SHARE MODAL ====== */}
             {showShareModal && (
                 <div className="modal-overlay" onClick={() => setShowShareModal(false)}>
                     <div className="modal glass-card share-modal" onClick={(e) => e.stopPropagation()}>
