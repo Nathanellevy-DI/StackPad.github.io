@@ -1,9 +1,29 @@
+/**
+ * MusicPlayer.jsx - YouTube Music Library Component
+ * 
+ * The main music management page where users can:
+ * - Add YouTube videos or full playlists to their library
+ * - View and manage their song/playlist collection
+ * - Play songs (audio persists across page navigation via MiniPlayer)
+ * - Use quick-start buttons for popular live streams
+ * 
+ * How it works:
+ * - Users paste YouTube URLs (videos or playlists)
+ * - URLs are parsed to extract video/playlist IDs
+ * - Songs are stored in Redux and localStorage
+ * - Actual playback happens in MiniPlayer.jsx (persists across pages)
+ */
+
 import { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { addSong, removeSong, playSong, playNext, playPrev } from '../../redux/slices/musicSlice';
 import './MusicPlayer.css';
 
-// Quick start streams
+// ============================================
+// QUICK START STREAMS
+// Popular 24/7 live radio streams for instant listening
+// These are well-known YouTube live streams that are always on
+// ============================================
 const STARTER_STREAMS = [
     { id: 'jfKfPfyJRdk', title: 'Lofi Hip Hop Radio', icon: '🎧', type: 'video' },
     { id: 'DWcJFNfaw9c', title: 'Jazz & Coffee', icon: '☕', type: 'video' },
@@ -13,15 +33,29 @@ const STARTER_STREAMS = [
 
 export default function MusicPlayer() {
     const dispatch = useDispatch();
+
+    // Get music state from Redux
     const { playlist, currentSong, currentIndex, isPlaying } = useSelector((state) => state.music);
 
+    // Form state for adding new songs
     const [newSongUrl, setNewSongUrl] = useState('');
     const [newSongTitle, setNewSongTitle] = useState('');
     const [showAddForm, setShowAddForm] = useState(false);
 
-    // Extract video ID or playlist ID from URL
+    /**
+     * parseYouTubeUrl - Extracts video or playlist ID from YouTube URL
+     * 
+     * Supports multiple URL formats:
+     * - youtube.com/watch?v=VIDEO_ID
+     * - youtu.be/VIDEO_ID
+     * - youtube.com/embed/VIDEO_ID
+     * - youtube.com/playlist?list=PLAYLIST_ID
+     * - youtube.com/watch?v=VIDEO_ID&list=PLAYLIST_ID (prioritizes playlist)
+     * 
+     * Returns: { type: 'video'|'playlist', id: string } or null if invalid
+     */
     const parseYouTubeUrl = (url) => {
-        // Check for playlist URL first
+        // Check for playlist URL first (takes priority)
         const playlistMatch = url.match(/[?&]list=([^&\s]+)/);
         if (playlistMatch) {
             return { type: 'playlist', id: playlistMatch[1] };
@@ -33,9 +67,13 @@ export default function MusicPlayer() {
             return { type: 'video', id: videoMatch[1] };
         }
 
-        return null;
+        return null;  // Invalid URL
     };
 
+    /**
+     * handleAddSong - Adds a new song/playlist to the library
+     * Parses URL, creates song object, adds to Redux store
+     */
     const handleAddSong = (e) => {
         e.preventDefault();
         if (!newSongUrl.trim()) return;
@@ -53,7 +91,7 @@ export default function MusicPlayer() {
             setNewSongTitle('');
             setShowAddForm(false);
 
-            // Auto-play if first song
+            // Auto-play if this is the first song added
             if (playlist.length === 0) {
                 dispatch(playSong({ song: newSong, index: 0 }));
             }
@@ -62,16 +100,25 @@ export default function MusicPlayer() {
         }
     };
 
+    /**
+     * handlePlaySong - Starts playing a specific song
+     */
     const handlePlaySong = (song, index) => {
         dispatch(playSong({ song, index }));
     };
 
+    /**
+     * handleRemoveSong - Removes a song from the library
+     */
     const handleRemoveSong = (songId) => {
         dispatch(removeSong(songId));
     };
 
+    /**
+     * handlePlayStream - Plays a quick-start stream
+     * Adds to library if not already there, then plays it
+     */
     const handlePlayStream = (stream) => {
-        // Add stream to playlist if not exists and play it
         const exists = playlist.find(s => s.id === stream.id);
         if (!exists) {
             dispatch(addSong(stream));
@@ -84,6 +131,7 @@ export default function MusicPlayer() {
 
     return (
         <div className="music-player-page">
+            {/* Page Header */}
             <div className="music-header">
                 <div>
                     <h2 className="music-title">
@@ -94,7 +142,7 @@ export default function MusicPlayer() {
                 </div>
             </div>
 
-            {/* Add Song Section */}
+            {/* ====== ADD SONG SECTION ====== */}
             <div className="add-song-section glass-card">
                 <div className="add-song-header">
                     <h3>➕ Add Songs or Playlists</h3>
@@ -106,6 +154,7 @@ export default function MusicPlayer() {
                     </button>
                 </div>
 
+                {/* Add song form (hidden by default) */}
                 {showAddForm && (
                     <form className="add-song-form" onSubmit={handleAddSong}>
                         <input
@@ -129,6 +178,7 @@ export default function MusicPlayer() {
                     </form>
                 )}
 
+                {/* Helpful hints */}
                 <div className="add-hints">
                     <p className="add-hint">
                         🎵 <strong>Single song:</strong> Paste any YouTube video URL
@@ -140,7 +190,7 @@ export default function MusicPlayer() {
             </div>
 
             <div className="music-content">
-                {/* My Playlist */}
+                {/* ====== MY LIBRARY (Playlist) ====== */}
                 <div className="playlist-section">
                     <h3 className="section-title">❤️ My Library ({playlist.length})</h3>
 
@@ -151,12 +201,15 @@ export default function MusicPlayer() {
                                     key={song.id + index}
                                     className={`song-item ${currentSong?.id === song.id ? 'playing' : ''} ${song.type === 'playlist' ? 'is-playlist' : ''}`}
                                 >
+                                    {/* Play button with current status indicator */}
                                     <button
                                         className="song-play-btn"
                                         onClick={() => handlePlaySong(song, index)}
                                     >
                                         {currentSong?.id === song.id && isPlaying ? '▶' : '○'}
                                     </button>
+
+                                    {/* Song info */}
                                     <div className="song-info">
                                         <span className="song-title" onClick={() => handlePlaySong(song, index)}>
                                             {song.type === 'playlist' && '📋 '}{song.title}
@@ -165,6 +218,8 @@ export default function MusicPlayer() {
                                             <span className="song-badge">Playlist</span>
                                         )}
                                     </div>
+
+                                    {/* Remove button */}
                                     <button
                                         className="song-remove-btn"
                                         onClick={() => handleRemoveSong(song.id)}
@@ -183,7 +238,7 @@ export default function MusicPlayer() {
                         )}
                     </div>
 
-                    {/* Playlist Controls */}
+                    {/* Prev/Next controls when multiple songs */}
                     {playlist.length > 1 && currentSong && (
                         <div className="playlist-controls">
                             <button
@@ -205,7 +260,7 @@ export default function MusicPlayer() {
                         </div>
                     )}
 
-                    {/* Quick Start */}
+                    {/* ====== QUICK START BUTTONS ====== */}
                     <div className="quick-start">
                         <h4 className="quick-label">🚀 Quick Start (Live Radio Streams)</h4>
                         <div className="quick-grid">
@@ -223,7 +278,7 @@ export default function MusicPlayer() {
                     </div>
                 </div>
 
-                {/* Now Playing Preview */}
+                {/* ====== NOW PLAYING SECTION ====== */}
                 <div className="player-section glass-card">
                     {currentSong ? (
                         <>

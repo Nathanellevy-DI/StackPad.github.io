@@ -1,13 +1,32 @@
+/**
+ * TodoList.jsx - Task Management Component
+ * 
+ * A simple but powerful to-do list for managing tasks.
+ * Each workspace has its own separate todo list (stored by workspace ID).
+ * 
+ * Features:
+ * - Add new tasks
+ * - Mark tasks as complete
+ * - Set priority levels (Low, Normal, High)
+ * - Filter by: All, Active, Completed
+ * - Clear all completed tasks with one click
+ * - Persist to localStorage per workspace
+ */
+
 import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { selectCurrentWorkspace } from '../../redux/slices/workspaceSlice';
 import './TodoList.css';
 
 export default function TodoList() {
+    // Get the current workspace to create a unique storage key
     const workspace = useSelector(selectCurrentWorkspace);
     const storageKey = `stackpad-todos-${workspace?.id || 'default'}`;
 
-    // Initialize todos from localStorage
+    // ============================================
+    // TODOS STATE
+    // Initialize from localStorage on mount
+    // ============================================
     const [todos, setTodos] = useState(() => {
         try {
             const stored = localStorage.getItem(storageKey);
@@ -17,7 +36,10 @@ export default function TodoList() {
         }
     });
 
+    // Input value for new todo
     const [newTodo, setNewTodo] = useState('');
+
+    // Current filter: 'all', 'active', or 'completed'
     const [filter, setFilter] = useState('all');
 
     // Load todos when workspace changes
@@ -30,28 +52,35 @@ export default function TodoList() {
         }
     }, [storageKey]);
 
-    // Save todos whenever they change
+    // Save todos to localStorage whenever they change
     useEffect(() => {
         localStorage.setItem(storageKey, JSON.stringify(todos));
     }, [todos, storageKey]);
 
+    /**
+     * addTodo - Adds a new task to the list
+     * Each task has: id, text, completed status, priority, and createdAt timestamp
+     */
     const addTodo = (e) => {
         e.preventDefault();
         const text = newTodo.trim();
-        if (!text) return;
+        if (!text) return;  // Don't add empty todos
 
         const newTask = {
-            id: Date.now(),
+            id: Date.now(),  // Unique ID using timestamp
             text: text,
             completed: false,
-            priority: 'normal',
+            priority: 'normal',  // Default priority
             createdAt: new Date().toISOString(),
         };
 
         setTodos(prevTodos => [...prevTodos, newTask]);
-        setNewTodo('');
+        setNewTodo('');  // Clear input
     };
 
+    /**
+     * toggleTodo - Toggles the completed status of a task
+     */
     const toggleTodo = (id) => {
         setTodos(prevTodos =>
             prevTodos.map(todo =>
@@ -60,10 +89,17 @@ export default function TodoList() {
         );
     };
 
+    /**
+     * deleteTodo - Removes a task from the list
+     */
     const deleteTodo = (id) => {
         setTodos(prevTodos => prevTodos.filter(todo => todo.id !== id));
     };
 
+    /**
+     * setPriority - Updates the priority level of a task
+     * Priorities: 'low', 'normal', 'high'
+     */
     const setPriority = (id, priority) => {
         setTodos(prevTodos =>
             prevTodos.map(todo =>
@@ -72,21 +108,27 @@ export default function TodoList() {
         );
     };
 
+    /**
+     * clearCompleted - Removes all completed tasks
+     */
     const clearCompleted = () => {
         setTodos(prevTodos => prevTodos.filter(todo => !todo.completed));
     };
 
+    // Apply filter to todos for display
     const filteredTodos = todos.filter(todo => {
         if (filter === 'active') return !todo.completed;
         if (filter === 'completed') return todo.completed;
-        return true;
+        return true;  // 'all' filter
     });
 
+    // Calculate counts for filter badges
     const completedCount = todos.filter(t => t.completed).length;
     const activeCount = todos.filter(t => !t.completed).length;
 
     return (
         <div className="todo-list">
+            {/* Header with title and workspace name */}
             <div className="todo-header">
                 <h2 className="todo-title">
                     <span className="title-icon">✅</span>
@@ -95,7 +137,7 @@ export default function TodoList() {
                 <span className="todo-workspace">{workspace?.name || 'Default'}</span>
             </div>
 
-            {/* Add Todo Form */}
+            {/* ====== ADD TODO FORM ====== */}
             <form className="add-todo-form" onSubmit={addTodo}>
                 <input
                     type="text"
@@ -109,7 +151,7 @@ export default function TodoList() {
                 </button>
             </form>
 
-            {/* Filter Tabs */}
+            {/* ====== FILTER TABS ====== */}
             <div className="todo-filters">
                 <button
                     type="button"
@@ -134,7 +176,7 @@ export default function TodoList() {
                 </button>
             </div>
 
-            {/* Todo Items */}
+            {/* ====== TODO ITEMS LIST ====== */}
             <div className="todo-items">
                 {filteredTodos.length > 0 ? (
                     filteredTodos.map((todo) => (
@@ -142,6 +184,7 @@ export default function TodoList() {
                             key={todo.id}
                             className={`todo-item ${todo.completed ? 'completed' : ''} priority-${todo.priority}`}
                         >
+                            {/* Checkbox to toggle completion */}
                             <button
                                 type="button"
                                 className="todo-checkbox"
@@ -149,7 +192,11 @@ export default function TodoList() {
                             >
                                 {todo.completed ? '✓' : ''}
                             </button>
+
+                            {/* Task text */}
                             <span className="todo-text">{todo.text}</span>
+
+                            {/* Actions: priority dropdown and delete button */}
                             <div className="todo-actions">
                                 <select
                                     className="priority-select"
@@ -171,6 +218,7 @@ export default function TodoList() {
                         </div>
                     ))
                 ) : (
+                    // Empty state message
                     <div className="no-todos">
                         <span className="no-todos-icon">📝</span>
                         <p>{filter === 'all' ? 'No tasks yet. Add one above!' : `No ${filter} tasks`}</p>
@@ -178,7 +226,7 @@ export default function TodoList() {
                 )}
             </div>
 
-            {/* Footer */}
+            {/* ====== FOOTER: Clear completed button ====== */}
             {completedCount > 0 && (
                 <div className="todo-footer">
                     <button type="button" className="clear-btn" onClick={clearCompleted}>

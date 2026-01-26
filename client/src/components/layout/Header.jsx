@@ -1,3 +1,18 @@
+/**
+ * Header.jsx - Top Navigation Bar
+ * 
+ * The header appears at the top of every page and contains:
+ * - Logo (StackPad branding)
+ * - Workspace switcher dropdown
+ * - Rotating motivational messages (changes every 30 seconds)
+ * - GitHub link (dynamic per workspace)
+ * - LinkedIn link (dynamic per user)
+ * - Theme toggle (dark/light mode)
+ * - User avatar (click to edit profile)
+ * 
+ * Layout: [Logo | Workspace] [Motivational Message] [GitHub | LinkedIn | Theme | Avatar]
+ */
+
 import { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { toggleTheme } from '../../redux/slices/themeSlice';
@@ -6,6 +21,11 @@ import { selectCurrentWorkspace } from '../../redux/slices/workspaceSlice';
 import WorkspaceSwitcher from '../WorkspaceSwitcher/WorkspaceSwitcher';
 import './Header.css';
 
+// ============================================
+// MOTIVATIONAL MESSAGES
+// These rotate automatically to keep the user
+// motivated and remind them to stay hydrated!
+// ============================================
 const MOTIVATIONAL_MESSAGES = [
     { text: "You're doing great! Keep it up! 💪", icon: "🚀" },
     { text: "💧 Remember to drink some water!", icon: "💧" },
@@ -28,27 +48,35 @@ const MOTIVATIONAL_MESSAGES = [
 
 export default function Header() {
     const dispatch = useDispatch();
-    const { mode } = useSelector((state) => state.theme);
-    const { user } = useSelector((state) => state.user);
-    const currentWorkspace = useSelector(selectCurrentWorkspace);
+
+    // Get state from Redux
+    const { mode } = useSelector((state) => state.theme);           // Current theme (dark/light)
+    const { user } = useSelector((state) => state.user);            // User profile data
+    const currentWorkspace = useSelector(selectCurrentWorkspace);    // Active workspace
+
+    // Track which motivational message to show
     const [messageIndex, setMessageIndex] = useState(0);
 
-    // Rotate messages every 30 seconds
+    // Rotate messages every 30 seconds (30000ms)
     useEffect(() => {
         const interval = setInterval(() => {
+            // Cycle through messages, wrapping back to 0 at the end
             setMessageIndex((prev) => (prev + 1) % MOTIVATIONAL_MESSAGES.length);
         }, 30000);
+
+        // Cleanup: stop the interval when component unmounts
         return () => clearInterval(interval);
     }, []);
 
     const currentMessage = MOTIVATIONAL_MESSAGES[messageIndex];
 
-    // Get dynamic URLs
-    const githubUrl = currentWorkspace?.githubUrl || '';
-    const linkedinUrl = user?.linkedinUrl || '';
+    // Get dynamic URLs from state (these are set by the user)
+    const githubUrl = currentWorkspace?.githubUrl || '';  // Per workspace
+    const linkedinUrl = user?.linkedinUrl || '';           // Per user
 
     return (
         <header className="header glass-card">
+            {/* ====== LEFT SECTION: Logo and Workspace ====== */}
             <div className="header-left">
                 <div className="logo">
                     <span className="logo-icon">📚</span>
@@ -57,14 +85,16 @@ export default function Header() {
                 <WorkspaceSwitcher />
             </div>
 
+            {/* ====== CENTER SECTION: Motivational Messages ====== */}
             <div className="header-center">
                 <div className="motivation-banner">
                     <span className="motivation-text">{currentMessage.text}</span>
                 </div>
             </div>
 
+            {/* ====== RIGHT SECTION: Actions and User ====== */}
             <div className="header-right">
-                {/* GitHub Link - Dynamic per workspace */}
+                {/* GitHub Link - Links to the current workspace's repository */}
                 <a
                     href={githubUrl || '#'}
                     target={githubUrl ? '_blank' : undefined}
@@ -78,7 +108,7 @@ export default function Header() {
                     </svg>
                 </a>
 
-                {/* LinkedIn Link - Dynamic per user */}
+                {/* LinkedIn Link - Links to the user's LinkedIn profile */}
                 <a
                     href={linkedinUrl || '#'}
                     target={linkedinUrl ? '_blank' : undefined}
@@ -92,7 +122,7 @@ export default function Header() {
                     </svg>
                 </a>
 
-                {/* Theme Toggle */}
+                {/* Theme Toggle - Switches between dark and light mode */}
                 <button
                     className="theme-toggle"
                     onClick={() => dispatch(toggleTheme())}
@@ -103,12 +133,13 @@ export default function Header() {
                     <span className={`toggle-slider ${mode}`}></span>
                 </button>
 
-                {/* User Avatar - Clickable */}
+                {/* User Avatar - Click to open profile edit modal */}
                 <button
                     className="user-avatar-btn"
                     onClick={() => dispatch(toggleProfileModal())}
                     title="Edit Profile"
                 >
+                    {/* DiceBear generates a unique avatar based on the seed string */}
                     <img
                         src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user.avatarSeed}`}
                         alt="User avatar"

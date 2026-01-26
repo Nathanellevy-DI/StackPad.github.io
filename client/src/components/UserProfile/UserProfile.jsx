@@ -1,3 +1,22 @@
+/**
+ * UserProfile.jsx - User Profile Edit Modal
+ * 
+ * A modal dialog for editing user profile information.
+ * Opens when clicking the avatar in the Header.
+ * 
+ * Editable fields:
+ * - Avatar (selecting from preset options via DiceBear API)
+ * - Display Name
+ * - LinkedIn URL (for the header social link)
+ * - Email (optional)
+ * 
+ * The modal closes by:
+ * - Clicking outside the modal (overlay)
+ * - Clicking the X button
+ * - Clicking Cancel
+ * - Saving changes
+ */
+
 import { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { updateUser, closeProfileModal } from '../../redux/slices/userSlice';
@@ -5,40 +24,62 @@ import './UserProfile.css';
 
 export default function UserProfile() {
     const dispatch = useDispatch();
+
+    // Get user data and modal state from Redux
     const { user, isProfileOpen } = useSelector((state) => state.user);
+
+    // Local form state (initialized with current user data)
     const [formData, setFormData] = useState(user);
 
+    // Don't render anything if modal is closed
     if (!isProfileOpen) return null;
 
+    /**
+     * handleSubmit - Saves the profile changes
+     * Dispatches updateUser action and closes modal
+     */
     const handleSubmit = (e) => {
         e.preventDefault();
         dispatch(updateUser(formData));
         dispatch(closeProfileModal());
     };
 
+    /**
+     * handleClose - Closes modal without saving
+     * Resets form data to original values
+     */
     const handleClose = () => {
         dispatch(closeProfileModal());
-        setFormData(user);
+        setFormData(user);  // Reset to original values
     };
 
+    // Available avatar options using DiceBear seed strings
+    // Each seed generates a unique avatar image
     const avatarSeeds = ['developer', 'coder', 'hacker', 'ninja', 'wizard', 'robot', 'astronaut', 'pirate'];
 
     return (
+        // Overlay - clicking it closes the modal
         <div className="profile-overlay" onClick={handleClose}>
+            {/* Modal content - stopPropagation prevents clicks from closing */}
             <div className="profile-modal glass-card" onClick={(e) => e.stopPropagation()}>
+                {/* Modal Header */}
                 <div className="profile-header">
                     <h2>Edit Profile</h2>
                     <button className="close-btn" onClick={handleClose}>✕</button>
                 </div>
 
                 <form onSubmit={handleSubmit}>
+                    {/* ====== AVATAR SELECTION ====== */}
                     <div className="avatar-section">
+                        {/* Current selected avatar (large) */}
                         <div className="current-avatar">
                             <img
                                 src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${formData.avatarSeed}`}
                                 alt="Avatar"
                             />
                         </div>
+
+                        {/* Avatar options grid */}
                         <div className="avatar-options">
                             <p>Choose Avatar:</p>
                             <div className="avatar-grid">
@@ -59,6 +100,7 @@ export default function UserProfile() {
                         </div>
                     </div>
 
+                    {/* ====== DISPLAY NAME FIELD ====== */}
                     <div className="form-group">
                         <label htmlFor="name">Display Name</label>
                         <input
@@ -71,6 +113,7 @@ export default function UserProfile() {
                         />
                     </div>
 
+                    {/* ====== LINKEDIN URL FIELD ====== */}
                     <div className="form-group">
                         <label htmlFor="linkedinUrl">LinkedIn URL</label>
                         <input
@@ -83,6 +126,7 @@ export default function UserProfile() {
                         />
                     </div>
 
+                    {/* ====== EMAIL FIELD (Optional) ====== */}
                     <div className="form-group">
                         <label htmlFor="email">Email (optional)</label>
                         <input
@@ -95,6 +139,7 @@ export default function UserProfile() {
                         />
                     </div>
 
+                    {/* ====== ACTION BUTTONS ====== */}
                     <div className="profile-actions">
                         <button type="button" className="glass-button" onClick={handleClose}>
                             Cancel
