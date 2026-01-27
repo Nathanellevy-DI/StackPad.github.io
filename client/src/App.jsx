@@ -38,7 +38,7 @@ import UserProfile from './components/UserProfile/UserProfile';       // Profile
 import ProgressStats from './components/ProgressStats/ProgressStats'; // Weekly stats & streaks
 import TodoList from './components/TodoList/TodoList';               // Task management
 import MusicPlayer from './components/MusicPlayer/MusicPlayer';       // YouTube music player
-import Settings from './components/Settings/Settings';               // App settings
+import SlackTab from './components/SlackIntegration/SlackTab';         // Slack Integration Hub
 
 import './App.css'; // Layout and container styles
 
@@ -95,6 +95,8 @@ function Dashboard() {
         return <MusicPlayer />;
       case 'settings':
         return <Settings />;
+      case 'slack':
+        return <SlackTab />;
 
       // Default: Show the main dashboard with multiple widgets
       case 'dashboard':

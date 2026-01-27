@@ -31,6 +31,7 @@ const NAV_ITEMS = [
     { id: 'progress', label: 'Progress', icon: '📊' },    // Stats and streaks
     { id: 'commands', label: 'Commands', icon: '⚡' },    // Command vault
     { id: 'hints', label: 'DevHints', icon: '💡' },       // Developer cheat sheets
+    { id: 'slack', label: 'Slack', icon: '💬' },          // Slack Integration
 ];
 
 export default function Sidebar({ activeSection, onSectionChange }) {

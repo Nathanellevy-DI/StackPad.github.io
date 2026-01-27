@@ -31,6 +31,7 @@ const NAV_ITEMS = [
     { id: 'todos', label: 'Tasks', icon: '✅' },        // Task management
     { id: 'music', label: 'Music', icon: '🎵' },        // Music player
     { id: 'progress', label: 'Stats', icon: '📊' },     // Progress stats
+    { id: 'slack', label: 'Slack', icon: '💬' },        // Slack Integration
     { id: 'settings', label: 'Settings', icon: '⚙️' },  // App settings
 ];
 
