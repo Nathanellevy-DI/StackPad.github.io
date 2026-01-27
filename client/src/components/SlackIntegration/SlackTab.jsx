@@ -52,11 +52,18 @@ export default function SlackTab() {
         const left = window.screen.width - width;
         const top = 0;
 
-        window.open(
+        const win = window.open(
             'https://app.slack.com/client',
             'StackPadSatellite',
             `width=${width},height=${height},left=${left},top=${top},menubar=no,toolbar=no,location=no,status=no`
         );
+
+        if (!win || win.closed || typeof win.closed == 'undefined') {
+            alert("🚨 Pop-up Blocked!\n\nPlease allow pop-ups for this site to use Satellite Mode. Look for the icon in your address bar.");
+            return;
+        }
+
+        setSatelliteWindow(win);
     };
 
     const handleSendToWebhook = async () => {
