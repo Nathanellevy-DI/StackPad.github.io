@@ -39,6 +39,7 @@ import ProgressStats from './components/ProgressStats/ProgressStats'; // Weekly 
 import TodoList from './components/TodoList/TodoList';               // Task management
 import MusicPlayer from './components/MusicPlayer/MusicPlayer';       // YouTube music player
 import SlackTab from './components/SlackIntegration/SlackTab';         // Slack Integration Hub
+import InstallPrompt from './components/InstallPrompt/InstallPrompt';  // PWA Install Banner
 
 import './App.css'; // Layout and container styles
 
@@ -144,6 +145,9 @@ function Dashboard() {
 
       {/* Music player that persists across all sections */}
       <MiniPlayer />
+
+      {/* PWA Install Prompt (Mobile/Desktop) */}
+      <InstallPrompt />
 
       {/* Mobile bottom navigation (hidden on desktop) */}
       <MobileNav
