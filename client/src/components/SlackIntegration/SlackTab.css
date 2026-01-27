@@ -5,8 +5,13 @@
     gap: 2rem;
     height: 100%;
     overflow-y: auto;
+    position: relative;
+    /* Context for drawer */
+    overflow-x: hidden;
+    /* Hide drawer when closed */
 }
 
+/* ... existing styles ... */
 .slack-header {
     display: flex;
     justify-content: space-between;
@@ -52,7 +57,8 @@
     background: rgba(54, 197, 240, 0.1);
 }
 
-.satellite-btn:hover {
+.satellite-btn:hover,
+.satellite-btn.active {
     background: rgba(54, 197, 240, 0.2);
 }
 
@@ -244,6 +250,99 @@
     border-color: #c62828;
 }
 
+/* =========================================
+   Drawer Styles
+   ========================================= */
+.slack-drawer {
+    position: fixed;
+    top: 0;
+    right: -400px;
+    /* Start off-screen */
+    width: 400px;
+    height: 100vh;
+    background: rgba(20, 20, 20, 0.85);
+    /* Dark semi-transparent */
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-left: 1px solid var(--glass-border);
+    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.slack-drawer.open {
+    right: 0;
+}
+
+.drawer-inner {
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.drawer-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.drawer-header h3 {
+    margin: 0;
+    color: var(--text-primary);
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    color: var(--text-primary);
+    font-size: 2rem;
+    cursor: pointer;
+    opacity: 0.7;
+    padding: 0;
+    line-height: 1;
+}
+
+.close-btn:hover {
+    opacity: 1;
+}
+
+.drawer-section h4 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    opacity: 0.6;
+}
+
+.quick-links-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.drawer-link {
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    color: var(--text-primary);
+    text-decoration: none;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+}
+
+.drawer-link:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateX(4px);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
 @media (max-width: 768px) {
     .slack-content {
         grid-template-columns: 1fr;
@@ -262,5 +361,10 @@
 
     .slack-actions button {
         flex: 1;
+    }
+
+    .slack-drawer {
+        width: 100%;
+        right: -100%;
     }
 }

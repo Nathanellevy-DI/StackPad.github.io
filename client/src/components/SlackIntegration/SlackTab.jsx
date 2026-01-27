@@ -21,15 +21,7 @@ export default function SlackTab() {
     const workspace = useSelector(selectCurrentWorkspace);
     const workspaceId = workspace?.id || 'default';
 
-    // Persistent draft state
-    const draftKey = `stackpad-slack-draft-${workspaceId}`;
-    const [draft, setDraft] = useState(() => localStorage.getItem(draftKey) || '');
-
-    // Persistent Webhook URL
-    const webhookKey = `stackpad-slack-webhook-${workspaceId}`;
-    const [webhookUrl, setWebhookUrl] = useState(() => localStorage.getItem(webhookKey) || '');
-    const [showSettings, setShowSettings] = useState(false);
-    const [sendStatus, setSendStatus] = useState(null); // 'sending', 'success', 'error', null
+    const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
     // Save draft automatically
     useEffect(() => {
@@ -41,29 +33,19 @@ export default function SlackTab() {
         localStorage.setItem(webhookKey, webhookUrl);
     }, [webhookUrl, webhookKey]);
 
+    // Handle outside click to close drawer
+    useEffect(() => {
+        const handleClickOutside = (e) => {
+            if (isDrawerOpen && !e.target.closest('.slack-drawer') && !e.target.closest('.satellite-btn')) {
+                setIsDrawerOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, [isDrawerOpen]);
+
     const handleLaunchSlack = () => {
         window.location.href = 'slack://open';
-    };
-
-    const handleLaunchSatellite = () => {
-        // Launches Slack in a vertical "sidecar" window
-        const width = 500;
-        const height = window.screen.height - 100;
-        const left = window.screen.width - width;
-        const top = 0;
-
-        const win = window.open(
-            'https://app.slack.com/client',
-            'StackPadSatellite',
-            `width=${width},height=${height},left=${left},top=${top},menubar=no,toolbar=no,location=no,status=no`
-        );
-
-        if (!win || win.closed || typeof win.closed == 'undefined') {
-            alert("🚨 Pop-up Blocked!\n\nPlease allow pop-ups for this site to use Satellite Mode. Look for the icon in your address bar.");
-            return;
-        }
-
-        setSatelliteWindow(win);
     };
 
     const handleSendToWebhook = async () => {
@@ -71,20 +53,12 @@ export default function SlackTab() {
 
         setSendStatus('sending');
         try {
-            // Note: Use 'no-cors' mode if standard CORS fails, 
-            // though this prevents reading the response status.
-            // For many Slack webhooks, standard POST works if headers are omitted.
             await fetch(webhookUrl, {
                 method: 'POST',
                 body: JSON.stringify({ text: draft }),
             });
-
-            // Assume success if no network error thrown
             setSendStatus('success');
             setTimeout(() => setSendStatus(null), 3000);
-
-            // Optional: Clear draft after send? 
-            // setDraft(''); 
         } catch (err) {
             console.error('Slack send error:', err);
             setSendStatus('error');
@@ -94,8 +68,54 @@ export default function SlackTab() {
 
     const copyDraft = () => {
         navigator.clipboard.writeText(draft);
-        // Visual feedback could be added here
     };
+
+    // Components for the drawer content to avoid duplication
+    const DrawerContent = () => (
+        <div className="drawer-inner">
+            <div className="drawer-header">
+                <h3>Slack Quick View</h3>
+                <button className="close-btn" onClick={() => setIsDrawerOpen(false)}>×</button>
+            </div>
+
+            <div className="drawer-section">
+                <h4>📨 Message Drafter</h4>
+                <div className="textarea-wrapper">
+                    <textarea
+                        value={draft}
+                        onChange={(e) => setDraft(e.target.value)}
+                        placeholder="Type your message..."
+                        className="draft-textarea glass-input"
+                    />
+                    <div className="draft-footer-actions">
+                        <button className="copy-draft-btn" onClick={copyDraft} title="Copy">
+                            📋
+                        </button>
+                        {webhookUrl && (
+                            <button
+                                className={`send-btn ${sendStatus}`}
+                                onClick={handleSendToWebhook}
+                                disabled={!draft.trim() || sendStatus === 'sending'}
+                            >
+                                {sendStatus === 'sending' ? '...' :
+                                    sendStatus === 'success' ? '✓' :
+                                        sendStatus === 'error' ? '⚠' : '➤'}
+                            </button>
+                        )}
+                    </div>
+                </div>
+            </div>
+
+            <div className="drawer-section">
+                <h4>🔗 Quick Links</h4>
+                <div className="quick-links-list">
+                    <a href="slack://open" className="drawer-link">💬 DMs</a>
+                    <a href="slack://open" className="drawer-link">📢 Mentions</a>
+                    <a href="slack://open" className="drawer-link">💾 Saved</a>
+                </div>
+            </div>
+        </div>
+    );
 
     return (
         <div className="slack-tab glass-card full-height">
@@ -115,8 +135,12 @@ export default function SlackTab() {
                     <button className="glass-button primary" onClick={handleLaunchSlack}>
                         🚀 App
                     </button>
-                    <button className="glass-button satellite-btn" onClick={handleLaunchSatellite} title="Launch in sidebar mode">
-                        📱 Satellite Mode
+                    <button
+                        className={`glass-button satellite-btn ${isDrawerOpen ? 'active' : ''}`}
+                        onClick={() => setIsDrawerOpen(!isDrawerOpen)}
+                        title="Toggle Sidebar Drawer"
+                    >
+                        📱 Toggle Sidebar
                     </button>
                     <button
                         className={`glass-button icon-only ${showSettings ? 'active' : ''}`}
@@ -169,7 +193,7 @@ export default function SlackTab() {
                     </div>
                 </div>
 
-                {/* Message Drafter */}
+                {/* Message Drafter (Main View) */}
                 <div className="message-drafter">
                     <div className="drafter-header">
                         <h3>📝 Message Drafter</h3>
@@ -204,6 +228,11 @@ export default function SlackTab() {
                         </div>
                     </div>
                 </div>
+            </div>
+
+            {/* Sliding Drawer */}
+            <div className={`slack-drawer ${isDrawerOpen ? 'open' : ''}`}>
+                <DrawerContent />
             </div>
         </div>
     );
