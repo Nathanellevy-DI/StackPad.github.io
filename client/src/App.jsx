@@ -38,6 +38,7 @@ import UserProfile from './components/UserProfile/UserProfile';       // Profile
 import ProgressStats from './components/ProgressStats/ProgressStats'; // Weekly stats & streaks
 import TodoList from './components/TodoList/TodoList';               // Task management
 import MusicPlayer from './components/MusicPlayer/MusicPlayer';       // YouTube music player
+import Settings from './components/Settings/Settings';                 // Settings page
 import SlackTab from './components/SlackIntegration/SlackTab';         // Slack Integration Hub
 import SlackDrafter from './components/SlackIntegration/SlackDrafter'; // Slack Drafter Widget
 import DraggableDashboard from './components/Dashboard/DraggableDashboard'; // Customizable Dashboard
