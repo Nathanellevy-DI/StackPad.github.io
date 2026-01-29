@@ -7,7 +7,7 @@
  * 
  * Features:
  * - Quick Launch: Deep links to open Slack app directly
- * - Satellite Mode: Launches an in-app draggable floating hub
+ * - Satellite Mode: Opens a sidebar drawer for multitasking within the app
  * - Message Drafting: Persistent scratchpad for composing messages
  * - Webhook Integration: Send messages directly to a channel
  */
@@ -15,7 +15,6 @@
 import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { selectCurrentWorkspace } from '../../redux/slices/workspaceSlice';
-import DraggableSatellite from './DraggableSatellite';
 import './SlackTab.css';
 
 export default function SlackTab() {
@@ -32,8 +31,8 @@ export default function SlackTab() {
     const [sendStatus, setSendStatus] = useState(null);
     const [showSettings, setShowSettings] = useState(false);
 
-    // Satellite State
-    const [showSatellite, setShowSatellite] = useState(false);
+    // Drawer State (Restored functionality, renamed per user preference)
+    const [isSatelliteOpen, setIsSatelliteOpen] = useState(false);
 
     // Save draft automatically
     useEffect(() => {
@@ -44,6 +43,17 @@ export default function SlackTab() {
     useEffect(() => {
         localStorage.setItem(webhookKey, webhookUrl);
     }, [webhookUrl, webhookKey]);
+
+    // Handle outside click to close satellite drawer
+    useEffect(() => {
+        const handleClickOutside = (e) => {
+            if (isSatelliteOpen && !e.target.closest('.slack-drawer') && !e.target.closest('.satellite-btn')) {
+                setIsSatelliteOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, [isSatelliteOpen]);
 
     const handleLaunchSlack = () => {
         window.location.href = 'slack://open';
@@ -74,104 +84,85 @@ export default function SlackTab() {
     // State for tone transformation
     const [isTransforming, setIsTransforming] = useState(false);
 
-    // Tone transformation functions (algorithmic "AI")
+    // Tone transformation functions
     const transformTone = (text, tone) => {
         if (!text.trim()) return text;
-
-        // Clean up the text first
         let result = text.trim();
-
         switch (tone) {
             case 'professional':
-                // Add formal greetings, proper punctuation, business language
-                result = result
-                    .replace(/hey|hi|yo/gi, 'Hello')
-                    .replace(/thanks|thx|ty/gi, 'Thank you')
-                    .replace(/gonna/gi, 'going to')
-                    .replace(/wanna/gi, 'want to')
-                    .replace(/gotta/gi, 'have to')
-                    .replace(/u\b/gi, 'you')
-                    .replace(/ur\b/gi, 'your')
-                    .replace(/pls|plz/gi, 'please')
-                    .replace(/asap/gi, 'at your earliest convenience')
-                    .replace(/btw/gi, 'Additionally,')
-                    .replace(/fyi/gi, 'For your information,')
-                    .replace(/lmk/gi, 'please let me know')
-                    .replace(/\!+/g, '.');
-                // Capitalize first letter of sentences
+                result = result.replace(/hey|hi|yo/gi, 'Hello').replace(/thanks/gi, 'Thank you');
                 result = result.replace(/(^\s*\w|[.!?]\s*\w)/g, c => c.toUpperCase());
-                if (!result.endsWith('.') && !result.endsWith('?') && !result.endsWith('!')) {
-                    result += '.';
-                }
+                if (!result.endsWith('.')) result += '.';
                 result = 'Dear Team,\n\n' + result + '\n\nBest regards';
                 break;
-
             case 'casual':
-                // Make it friendly and relaxed
-                result = result
-                    .replace(/Hello|Dear/gi, 'Hey')
-                    .replace(/Thank you/gi, 'Thanks')
-                    .replace(/Best regards|Sincerely|Regards/gi, 'Cheers!')
-                    .replace(/at your earliest convenience/gi, 'ASAP')
-                    .replace(/Additionally,/gi, 'btw')
-                    .replace(/For your information,/gi, 'fyi')
-                    .replace(/please let me know/gi, 'lmk')
-                    .replace(/\.\s*$/g, '!')
-                    .replace(/Dear Team,\n\n/gi, '');
-                if (!result.startsWith('Hey')) {
-                    result = 'Hey! ' + result;
-                }
+                result = 'Hey! ' + result.replace(/Hello/gi, 'Hey');
                 break;
-
             case 'sales':
-                // Add enthusiasm, urgency, and value propositions
-                result = result
-                    .replace(/good/gi, 'amazing')
-                    .replace(/nice/gi, 'incredible')
-                    .replace(/help/gi, 'empower')
-                    .replace(/buy/gi, 'invest in')
-                    .replace(/cost/gi, 'investment')
-                    .replace(/cheap/gi, 'cost-effective')
-                    .replace(/problem/gi, 'challenge')
-                    .replace(/\./g, '!');
-                result = '🚀 ' + result + '\n\n✨ Don\'t miss this opportunity! Ready to take the next step?';
+                result = '🚀 ' + result + '\n\n✨ Don\'t miss out!';
                 break;
-
             case 'friendly':
-                // Warm and personal
-                result = result
-                    .replace(/Hello/gi, 'Hi there')
-                    .replace(/Thank you/gi, 'Thanks so much')
-                    .replace(/Best regards/gi, 'Take care!')
-                    .replace(/Sincerely/gi, 'Warmly,');
-                // Add emoji based on content
-                if (result.includes('thank') || result.includes('Thanks')) {
-                    result = result.replace(/thanks/gi, 'thanks 🙏');
-                }
-                if (!result.includes('😊') && !result.includes('🙏')) {
-                    result += ' 😊';
-                }
-                result = 'Hi there! 👋\n\n' + result;
-                break;
-
-            default:
+                result = 'Hi there! 👋\n\n' + result + ' 😊';
                 break;
         }
-
         return result;
     };
 
     const handleToneTransform = (tone) => {
         if (!draft.trim()) return;
         setIsTransforming(true);
-
-        // Simulate "AI thinking" delay
         setTimeout(() => {
-            const transformed = transformTone(draft, tone);
-            setDraft(transformed);
+            setDraft(transformTone(draft, tone));
             setIsTransforming(false);
         }, 600);
     };
+
+    // Components for the drawer content
+    const SatelliteDrawerContent = () => (
+        <div className="drawer-inner">
+            <div className="drawer-header">
+                <h3>Slack Satellite</h3>
+                <button className="close-btn" onClick={() => setIsSatelliteOpen(false)}>×</button>
+            </div>
+
+            <div className="drawer-section">
+                <h4>📨 Message Drafter</h4>
+                <div className="textarea-wrapper">
+                    <textarea
+                        value={draft}
+                        onChange={(e) => setDraft(e.target.value)}
+                        placeholder="Type your message..."
+                        className="draft-textarea glass-input"
+                    />
+                    <div className="draft-footer-actions">
+                        <button className="copy-draft-btn" onClick={copyDraft} title="Copy">
+                            📋
+                        </button>
+                        {webhookUrl && (
+                            <button
+                                className={`send-btn ${sendStatus}`}
+                                onClick={handleSendToWebhook}
+                                disabled={!draft.trim() || sendStatus === 'sending'}
+                            >
+                                {sendStatus === 'sending' ? '...' :
+                                    sendStatus === 'success' ? '✓' :
+                                        sendStatus === 'error' ? '⚠' : '➤'}
+                            </button>
+                        )}
+                    </div>
+                </div>
+            </div>
+
+            <div className="drawer-section">
+                <h4>🔗 Quick Links</h4>
+                <div className="quick-links-list">
+                    <a href="slack://open" className="drawer-link">💬 DMs</a>
+                    <a href="slack://open" className="drawer-link">📢 Mentions</a>
+                    <a href="slack://open" className="drawer-link">💾 Saved</a>
+                </div>
+            </div>
+        </div>
+    );
 
     return (
         <div className="slack-tab glass-card full-height">
@@ -192,11 +183,11 @@ export default function SlackTab() {
                         🚀 App
                     </button>
                     <button
-                        className={`glass-button satellite-btn ${showSatellite ? 'active' : ''}`}
-                        onClick={() => setShowSatellite(!showSatellite)}
-                        title="Toggle Satellite Widget"
+                        className={`glass-button satellite-btn ${isSatelliteOpen ? 'active' : ''}`}
+                        onClick={() => setIsSatelliteOpen(!isSatelliteOpen)}
+                        title="Toggle Satellite Mode"
                     >
-                        📡 Satellite Mode
+                        📡 Satellite
                     </button>
                     <button
                         className={`glass-button icon-only ${showSettings ? 'active' : ''}`}
@@ -297,13 +288,10 @@ export default function SlackTab() {
                 </div>
             </div>
 
-            {/* Draggable Satellite Widget */}
-            {showSatellite && (
-                <DraggableSatellite
-                    onClose={() => setShowSatellite(false)}
-                    initialContent={draft}
-                />
-            )}
+            {/* Application Drawer (Satellite Mode) */}
+            <div className={`slack-drawer ${isSatelliteOpen ? 'open' : ''}`}>
+                <SatelliteDrawerContent />
+            </div>
         </div>
     );
 }
