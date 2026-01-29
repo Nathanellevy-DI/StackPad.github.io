@@ -139,9 +139,9 @@ export default function Header() {
                     onClick={() => dispatch(toggleProfileModal())}
                     title="Edit Profile"
                 >
-                    {/* DiceBear generates a unique avatar based on the seed string */}
+                    {/* Use custom avatar URL if available, otherwise fallback to DiceBear */}
                     <img
-                        src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user.avatarSeed}`}
+                        src={user.avatar?.url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.avatarSeed}`}
                         alt="User avatar"
                     />
                 </button>

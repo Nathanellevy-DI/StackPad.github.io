@@ -4,22 +4,16 @@
  * A modal dialog for editing user profile information.
  * Opens when clicking the avatar in the Header.
  * 
- * Editable fields:
- * - Avatar (selecting from preset options via DiceBear API)
- * - Display Name
- * - LinkedIn URL (for the header social link)
- * - Email (optional)
- * 
- * The modal closes by:
- * - Clicking outside the modal (overlay)
- * - Clicking the X button
- * - Clicking Cancel
- * - Saving changes
+ * Features:
+ * - Custom avatar builder with face, hair, accessories
+ * - Upload your own avatar image
+ * - Display Name, LinkedIn URL, Email fields
  */
 
 import { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { updateUser, closeProfileModal } from '../../redux/slices/userSlice';
+import AvatarBuilder from './AvatarBuilder';
 import './UserProfile.css';
 
 export default function UserProfile() {
@@ -31,12 +25,14 @@ export default function UserProfile() {
     // Local form state (initialized with current user data)
     const [formData, setFormData] = useState(user);
 
+    // Avatar builder modal state
+    const [showAvatarBuilder, setShowAvatarBuilder] = useState(false);
+
     // Don't render anything if modal is closed
     if (!isProfileOpen) return null;
 
     /**
      * handleSubmit - Saves the profile changes
-     * Dispatches updateUser action and closes modal
      */
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -46,109 +42,118 @@ export default function UserProfile() {
 
     /**
      * handleClose - Closes modal without saving
-     * Resets form data to original values
      */
     const handleClose = () => {
         dispatch(closeProfileModal());
-        setFormData(user);  // Reset to original values
+        setFormData(user);
+        setShowAvatarBuilder(false);
     };
 
-    // Available avatar options using DiceBear seed strings
-    // Each seed generates a unique avatar image
-    const avatarSeeds = ['developer', 'coder', 'hacker', 'ninja', 'wizard', 'robot', 'astronaut', 'pirate'];
+    /**
+     * handleAvatarSave - Saves avatar from builder
+     */
+    const handleAvatarSave = (avatarData) => {
+        setFormData(prev => ({ ...prev, avatar: avatarData }));
+        setShowAvatarBuilder(false);
+    };
+
+    /**
+     * getAvatarUrl - Returns current avatar URL
+     */
+    const getAvatarUrl = () => {
+        if (formData.avatar?.url) {
+            return formData.avatar.url;
+        }
+        // Fallback to old avatarSeed format
+        return `https://api.dicebear.com/7.x/avataaars/svg?seed=${formData.avatarSeed || 'developer'}`;
+    };
 
     return (
-        // Overlay - clicking it closes the modal
         <div className="profile-overlay" onClick={handleClose}>
-            {/* Modal content - stopPropagation prevents clicks from closing */}
             <div className="profile-modal glass-card" onClick={(e) => e.stopPropagation()}>
                 {/* Modal Header */}
                 <div className="profile-header">
-                    <h2>Edit Profile</h2>
+                    <h2>{showAvatarBuilder ? 'Customize Avatar' : 'Edit Profile'}</h2>
                     <button className="close-btn" onClick={handleClose}>✕</button>
                 </div>
 
-                <form onSubmit={handleSubmit}>
-                    {/* ====== AVATAR SELECTION ====== */}
-                    <div className="avatar-section">
-                        {/* Current selected avatar (large) */}
-                        <div className="current-avatar">
-                            <img
-                                src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${formData.avatarSeed}`}
-                                alt="Avatar"
+                {showAvatarBuilder ? (
+                    /* Avatar Builder View */
+                    <AvatarBuilder
+                        currentAvatar={formData.avatar}
+                        onSave={handleAvatarSave}
+                        onCancel={() => setShowAvatarBuilder(false)}
+                    />
+                ) : (
+                    /* Profile Form View */
+                    <form onSubmit={handleSubmit}>
+                        {/* Avatar Section */}
+                        <div className="avatar-section">
+                            <div className="current-avatar clickable" onClick={() => setShowAvatarBuilder(true)}>
+                                <img src={getAvatarUrl()} alt="Avatar" />
+                                <div className="avatar-edit-overlay">
+                                    <span>✏️</span>
+                                </div>
+                            </div>
+                            <button
+                                type="button"
+                                className="edit-avatar-btn"
+                                onClick={() => setShowAvatarBuilder(true)}
+                            >
+                                🎨 Customize Avatar
+                            </button>
+                        </div>
+
+                        {/* Display Name */}
+                        <div className="form-group">
+                            <label htmlFor="name">Display Name</label>
+                            <input
+                                type="text"
+                                id="name"
+                                className="glass-input"
+                                value={formData.name}
+                                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                placeholder="Your name"
                             />
                         </div>
 
-                        {/* Avatar options grid */}
-                        <div className="avatar-options">
-                            <p>Choose Avatar:</p>
-                            <div className="avatar-grid">
-                                {avatarSeeds.map((seed) => (
-                                    <button
-                                        key={seed}
-                                        type="button"
-                                        className={`avatar-option ${formData.avatarSeed === seed ? 'active' : ''}`}
-                                        onClick={() => setFormData({ ...formData, avatarSeed: seed })}
-                                    >
-                                        <img
-                                            src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}`}
-                                            alt={seed}
-                                        />
-                                    </button>
-                                ))}
-                            </div>
+                        {/* LinkedIn URL */}
+                        <div className="form-group">
+                            <label htmlFor="linkedinUrl">LinkedIn URL</label>
+                            <input
+                                type="url"
+                                id="linkedinUrl"
+                                className="glass-input"
+                                value={formData.linkedinUrl || ''}
+                                onChange={(e) => setFormData({ ...formData, linkedinUrl: e.target.value })}
+                                placeholder="https://linkedin.com/in/your-profile"
+                            />
                         </div>
-                    </div>
 
-                    {/* ====== DISPLAY NAME FIELD ====== */}
-                    <div className="form-group">
-                        <label htmlFor="name">Display Name</label>
-                        <input
-                            type="text"
-                            id="name"
-                            className="glass-input"
-                            value={formData.name}
-                            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                            placeholder="Your name"
-                        />
-                    </div>
+                        {/* Email */}
+                        <div className="form-group">
+                            <label htmlFor="email">Email (optional)</label>
+                            <input
+                                type="email"
+                                id="email"
+                                className="glass-input"
+                                value={formData.email}
+                                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                placeholder="your@email.com"
+                            />
+                        </div>
 
-                    {/* ====== LINKEDIN URL FIELD ====== */}
-                    <div className="form-group">
-                        <label htmlFor="linkedinUrl">LinkedIn URL</label>
-                        <input
-                            type="url"
-                            id="linkedinUrl"
-                            className="glass-input"
-                            value={formData.linkedinUrl || ''}
-                            onChange={(e) => setFormData({ ...formData, linkedinUrl: e.target.value })}
-                            placeholder="https://linkedin.com/in/your-profile"
-                        />
-                    </div>
-
-                    {/* ====== EMAIL FIELD (Optional) ====== */}
-                    <div className="form-group">
-                        <label htmlFor="email">Email (optional)</label>
-                        <input
-                            type="email"
-                            id="email"
-                            className="glass-input"
-                            value={formData.email}
-                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                            placeholder="your@email.com"
-                        />
-                    </div>
-
-                    {/* ====== ACTION BUTTONS ====== */}
-                    <div className="profile-actions">
-                        <button type="button" className="glass-button" onClick={handleClose}>
-                            Cancel
-                        </button>
-                        <button type="submit" className="glass-button primary">
-                            Save Profile
-                        </button>
-                    </div>
-                </form>
+                        {/* Action Buttons */}
+                        <div className="profile-actions">
+                            <button type="button" className="glass-button" onClick={handleClose}>
+                                Cancel
+                            </button>
+                            <button type="submit" className="glass-button primary">
+                                Save Profile
+                            </button>
+                        </div>
+                    </form>
+                )}
             </div>
         </div>
     );

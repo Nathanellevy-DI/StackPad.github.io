@@ -1,0 +1,198 @@
+/* AvatarBuilder Styles */
+.avatar-builder {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+/* Mode Toggle */
+.builder-mode-toggle {
+    display: flex;
+    gap: 0.5rem;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 0.25rem;
+    border-radius: 12px;
+}
+
+.mode-btn {
+    flex: 1;
+    padding: 0.6rem 1rem;
+    border: none;
+    border-radius: 10px;
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.mode-btn:hover {
+    color: var(--text-primary);
+}
+
+.mode-btn.active {
+    background: var(--accent-primary);
+    color: white;
+}
+
+/* Avatar Preview */
+.avatar-preview-large {
+    width: 120px;
+    height: 120px;
+    margin: 0 auto;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 3px solid var(--accent-primary);
+    box-shadow: 0 0 30px var(--accent-glow);
+    background: var(--bg-secondary);
+}
+
+.avatar-preview-large img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Randomize Button */
+.randomize-btn {
+    align-self: center;
+    padding: 0.5rem 1.5rem;
+    border-radius: 20px;
+    border: 1px solid var(--glass-border);
+    background: rgba(139, 92, 246, 0.1);
+    color: var(--text-primary);
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.randomize-btn:hover {
+    background: rgba(139, 92, 246, 0.2);
+    transform: scale(1.05);
+}
+
+/* Category Tabs */
+.category-tabs {
+    display: flex;
+    gap: 0.25rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 0.5rem;
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 12px;
+}
+
+.category-tab {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    background: transparent;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.category-tab:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.category-tab.active {
+    background: var(--accent-primary);
+    border-color: var(--accent-primary);
+}
+
+/* Options Container */
+.options-container {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    padding: 1rem;
+}
+
+.options-title {
+    margin: 0 0 0.75rem 0;
+    font-size: 0.9rem;
+    text-align: center;
+    color: var(--text-secondary);
+}
+
+.options-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: center;
+}
+
+.option-btn {
+    min-width: 60px;
+    padding: 0.5rem 0.75rem;
+    border-radius: 8px;
+    border: 2px solid var(--glass-border);
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-primary);
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.option-btn:hover {
+    border-color: var(--text-muted);
+    transform: translateY(-2px);
+}
+
+.option-btn.active {
+    border-color: var(--accent-primary);
+    background: rgba(139, 92, 246, 0.2);
+    box-shadow: 0 0 10px var(--accent-glow);
+}
+
+/* Color swatches */
+.option-btn[style*="background"] {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    padding: 0;
+    border-radius: 50%;
+}
+
+/* Upload Info */
+.upload-info {
+    text-align: center;
+    padding: 1rem;
+    background: rgba(76, 175, 80, 0.1);
+    border-radius: 12px;
+    border: 1px solid rgba(76, 175, 80, 0.3);
+}
+
+.upload-info p {
+    margin: 0 0 0.75rem 0;
+    color: var(--accent-green);
+}
+
+.change-upload-btn {
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    border: 1px solid var(--glass-border);
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-primary);
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+
+.change-upload-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* Builder Actions */
+.builder-actions {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--glass-border);
+}
