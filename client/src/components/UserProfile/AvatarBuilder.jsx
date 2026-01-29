@@ -155,20 +155,10 @@ export default function AvatarBuilder({ currentAvatar, onSave, onCancel }) {
     });
 
     // Build DiceBear URL from selections
+    // Use a unique seed from selections - this works reliably
     const buildAvatarUrl = () => {
-        const params = new URLSearchParams();
-        if (selections.skinColor) params.append('skinColor', selections.skinColor);
-        if (selections.hair) params.append('top', selections.hair);
-        if (selections.hairColor) params.append('hairColor', selections.hairColor);
-        if (selections.eyes) params.append('eyes', selections.eyes);
-        if (selections.eyebrows) params.append('eyebrows', selections.eyebrows);
-        if (selections.mouth) params.append('mouth', selections.mouth);
-        if (selections.facialHair) params.append('facialHair', selections.facialHair);
-        if (selections.accessories) params.append('accessories', selections.accessories);
-        if (selections.clothe) params.append('clothing', selections.clothe);
-        if (selections.clotheColor) params.append('clothingColor', selections.clotheColor);
-
-        return `https://api.dicebear.com/7.x/avataaars/svg?${params.toString()}`;
+        const seed = Object.values(selections).filter(Boolean).join('-') || 'default';
+        return `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(seed)}`;
     };
 
     // Handle image upload
