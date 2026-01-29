@@ -179,29 +179,6 @@ export default function SlackTab() {
             )}
 
             <div className="slack-content">
-                {/* Visual Placeholder / Dashboard */}
-                <div className="slack-status-card">
-                    <h3>Quick Actions</h3>
-                    <div className="quick-links-grid">
-                        <a href="slack://open" className="quick-link">
-                            <span className="link-icon">💬</span>
-                            <span>Direct Messages</span>
-                        </a>
-                        <a href="slack://open" className="quick-link">
-                            <span className="link-icon">📢</span>
-                            <span>Mentions</span>
-                        </a>
-                        <a href="slack://open" className="quick-link">
-                            <span className="link-icon">💾</span>
-                            <span>Saved Items</span>
-                        </a>
-                        <a href="slack://open" className="quick-link">
-                            <span className="link-icon">🔍</span>
-                            <span>Search</span>
-                        </a>
-                    </div>
-                </div>
-
                 {/* Message Drafter (Main View) */}
                 <div className="message-drafter">
                     <div className="drafter-header">
