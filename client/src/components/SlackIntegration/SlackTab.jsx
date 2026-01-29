@@ -21,7 +21,16 @@ export default function SlackTab() {
     const workspace = useSelector(selectCurrentWorkspace);
     const workspaceId = workspace?.id || 'default';
 
+    // Storage keys per workspace
+    const draftKey = `stackpad_slack_draft_${workspaceId}`;
+    const webhookKey = `stackpad_slack_webhook_${workspaceId}`;
+
+    // State declarations
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+    const [draft, setDraft] = useState(() => localStorage.getItem(draftKey) || '');
+    const [webhookUrl, setWebhookUrl] = useState(() => localStorage.getItem(webhookKey) || '');
+    const [sendStatus, setSendStatus] = useState(null);
+    const [showSettings, setShowSettings] = useState(false);
 
     // Save draft automatically
     useEffect(() => {
