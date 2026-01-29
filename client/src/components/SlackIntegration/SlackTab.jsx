@@ -7,7 +7,7 @@
  * 
  * Features:
  * - Quick Launch: Deep links to open Slack app directly
- * - Satellite Mode: Launches Slack in a "sidecar" popup window (User preference)
+ * - Satellite Mode: Launches an in-app draggable floating hub
  * - Message Drafting: Persistent scratchpad for composing messages
  * - Webhook Integration: Send messages directly to a channel
  */
@@ -15,6 +15,7 @@
 import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { selectCurrentWorkspace } from '../../redux/slices/workspaceSlice';
+import DraggableSatellite from './DraggableSatellite';
 import './SlackTab.css';
 
 export default function SlackTab() {
@@ -30,6 +31,9 @@ export default function SlackTab() {
     const [webhookUrl, setWebhookUrl] = useState(() => localStorage.getItem(webhookKey) || '');
     const [sendStatus, setSendStatus] = useState(null);
     const [showSettings, setShowSettings] = useState(false);
+
+    // Satellite State
+    const [showSatellite, setShowSatellite] = useState(false);
 
     // Save draft automatically
     useEffect(() => {
@@ -169,20 +173,6 @@ export default function SlackTab() {
         }, 600);
     };
 
-    const handleOpenSatellite = () => {
-        // Open a small popup window for Slack
-        const width = 400;
-        const height = 600;
-        const left = window.screen.width - width - 50;
-        const top = 100;
-
-        window.open(
-            'slack://open',
-            'StackPadSlackSatellite',
-            `width=${width},height=${height},left=${left},top=${top},menubar=no,toolbar=no,location=no,status=no`
-        );
-    };
-
     return (
         <div className="slack-tab glass-card full-height">
             <div className="slack-header">
@@ -202,9 +192,9 @@ export default function SlackTab() {
                         🚀 App
                     </button>
                     <button
-                        className="glass-button satellite-btn"
-                        onClick={handleOpenSatellite}
-                        title="Launch Satellite Window"
+                        className={`glass-button satellite-btn ${showSatellite ? 'active' : ''}`}
+                        onClick={() => setShowSatellite(!showSatellite)}
+                        title="Toggle Satellite Widget"
                     >
                         📡 Satellite Mode
                     </button>
@@ -218,7 +208,7 @@ export default function SlackTab() {
                 </div>
             </div>
 
-            {/* Settings Panel */}
+            {/* Configured Settings Panel */}
             {showSettings && (
                 <div className="slack-settings-panel">
                     <label>Incoming Webhook URL</label>
@@ -306,6 +296,14 @@ export default function SlackTab() {
                     </div>
                 </div>
             </div>
+
+            {/* Draggable Satellite Widget */}
+            {showSatellite && (
+                <DraggableSatellite
+                    onClose={() => setShowSatellite(false)}
+                    initialContent={draft}
+                />
+            )}
         </div>
     );
 }

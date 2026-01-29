@@ -1,0 +1,135 @@
+.draggable-satellite {
+    position: fixed;
+    width: 300px;
+    background: rgba(30, 30, 35, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    z-index: 9999;
+    user-select: none;
+    overflow: hidden;
+    transition: width 0.3s, height 0.3s;
+}
+
+.draggable-satellite.minimized {
+    width: 180px;
+}
+
+.satellite-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    cursor: grab;
+    height: 40px;
+}
+
+.satellite-header:active {
+    cursor: grabbing;
+}
+
+.satellite-title {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #e2e2e2;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.slack-icon {
+    color: #E01E5A;
+    /* Slack Red/Pink */
+    font-weight: 800;
+}
+
+.satellite-controls {
+    display: flex;
+    gap: 4px;
+}
+
+.satellite-controls button {
+    background: transparent;
+    border: none;
+    color: #aaa;
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+}
+
+.satellite-controls button:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.satellite-controls button.close-btn:hover {
+    background: #E01E5A;
+}
+
+.satellite-content {
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.satellite-input {
+    width: 100%;
+    height: 100px;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    padding: 8px;
+    color: #fff;
+    font-family: inherit;
+    font-size: 0.85rem;
+    resize: none;
+}
+
+.satellite-input:focus {
+    outline: none;
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.satellite-actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.satellite-action-btn {
+    flex: 1;
+    padding: 6px;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.05);
+    color: #ccc;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.satellite-action-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.satellite-action-btn.primary {
+    background: rgba(224, 30, 90, 0.2);
+    /* Slack color tint */
+    border-color: rgba(224, 30, 90, 0.5);
+    color: #ffb8cd;
+}
+
+.satellite-action-btn.primary:hover {
+    background: rgba(224, 30, 90, 0.4);
+}
