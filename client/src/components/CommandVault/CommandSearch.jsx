@@ -355,19 +355,8 @@ export default function CommandSearch() {
                 </button>
             </div>
 
-            {/* Category selection tabs */}
-            <div className="category-tabs">
-                {CATEGORIES.map((cat) => (
-                    <button
-                        key={cat.id}
-                        className={`category-tab ${selectedCategory === cat.id ? 'active' : ''}`}
-                        onClick={() => dispatch(setSelectedCategory(cat.id))}
-                    >
-                        <span className="category-icon">{cat.icon}</span>
-                        <span className="category-label">{cat.label}</span>
-                    </button>
-                ))}
-            </div>
+
+            {/* Category tabs removed per user request */}
 
             {/* Filter results summary */}
             <div className="results-info">
