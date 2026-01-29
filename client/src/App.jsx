@@ -40,6 +40,7 @@ import TodoList from './components/TodoList/TodoList';               // Task man
 import MusicPlayer from './components/MusicPlayer/MusicPlayer';       // YouTube music player
 import SlackTab from './components/SlackIntegration/SlackTab';         // Slack Integration Hub
 import SlackDrafter from './components/SlackIntegration/SlackDrafter'; // Slack Drafter Widget
+import DraggableDashboard from './components/Dashboard/DraggableDashboard'; // Customizable Dashboard
 import InstallPrompt from './components/InstallPrompt/InstallPrompt';  // PWA Install Banner
 
 import './App.css'; // Layout and container styles
@@ -100,26 +101,10 @@ function Dashboard() {
       case 'slack':
         return <SlackTab />;
 
-      // Default: Show the main dashboard with multiple widgets
+      // Default: Show the main dashboard with customizable widgets
       case 'dashboard':
       default:
-        return (
-          <div className="dashboard-grid">
-            {/* Dashboard shows widgets in a grid layout */}
-            <div className="dashboard-section timer-section">
-              <ZenTimer />
-            </div>
-            <div className="dashboard-section commands-section">
-              <CommandSearch />
-            </div>
-            <div className="dashboard-section logs-section">
-              <SystemLogs />
-            </div>
-            <div className="dashboard-section slack-section">
-              <SlackDrafter />
-            </div>
-          </div>
-        );
+        return <DraggableDashboard />;
     }
   };
 
