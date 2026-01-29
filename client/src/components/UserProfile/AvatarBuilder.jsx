@@ -255,45 +255,15 @@ export default function AvatarBuilder({ currentAvatar, onSave, onCancel }) {
             </div>
 
             {mode === 'build' && (
-                <>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'center', padding: '1rem' }}>
+                    <p style={{ color: 'var(--text-secondary)', textAlign: 'center' }}>
+                        Click randomize to generate a unique avatar!
+                    </p>
                     {/* Randomize Button */}
-                    <button className="randomize-btn" onClick={randomize}>
-                        🎲 Randomize
+                    <button className="randomize-btn" onClick={randomize} style={{ width: '100%', maxWidth: '200px', padding: '0.8rem' }}>
+                        🎲 Randomize Avatar
                     </button>
-
-                    {/* Category Tabs */}
-                    <div className="category-tabs">
-                        {CATEGORIES.map(cat => (
-                            <button
-                                key={cat.id}
-                                className={`category-tab ${activeCategory === cat.id ? 'active' : ''}`}
-                                onClick={() => setActiveCategory(cat.id)}
-                                title={cat.title}
-                            >
-                                {cat.label}
-                            </button>
-                        ))}
-                    </div>
-
-                    {/* Options Grid */}
-                    <div className="options-container">
-                        <h4 className="options-title">
-                            {CATEGORIES.find(c => c.id === activeCategory)?.title}
-                        </h4>
-                        <div className="options-grid">
-                            {AVATAR_OPTIONS[activeCategory]?.map(option => (
-                                <button
-                                    key={option.id}
-                                    className={`option-btn ${selections[activeCategory] === option.id ? 'active' : ''}`}
-                                    onClick={() => handleSelect(activeCategory, option.id)}
-                                    style={option.color ? { backgroundColor: option.color } : {}}
-                                >
-                                    {option.color ? '' : option.label}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-                </>
+                </div>
             )}
 
             {mode === 'upload' && uploadedImage && (
