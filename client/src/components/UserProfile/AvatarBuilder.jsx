@@ -155,10 +155,100 @@ export default function AvatarBuilder({ currentAvatar, onSave, onCancel }) {
     });
 
     // Build DiceBear URL from selections
-    // Use a unique seed from selections - this works reliably
+    // DiceBear 7.x uses array syntax: param[]=value
     const buildAvatarUrl = () => {
-        const seed = Object.values(selections).filter(Boolean).join('-') || 'default';
-        return `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(seed)}`;
+        const params = [];
+
+        // Fixed seed for consistent base avatar
+        params.push('seed=myavatar');
+
+        // Skin color - must be hex without #
+        const skinColors = {
+            'light': 'ffdbb4',
+            'pale': 'edb98a',
+            'brown': 'd08b5b',
+            'darkBrown': 'ae5d29',
+            'black': '614335',
+        };
+        if (selections.skinColor && skinColors[selections.skinColor]) {
+            params.push(`skinColor=${skinColors[selections.skinColor]}`);
+        }
+
+        // Hair/Top style
+        if (selections.hair) {
+            params.push(`top=${selections.hair}`);
+        }
+
+        // Hair color - hex without #
+        const hairColors = {
+            'black': '2c1b18',
+            'brown': '724133',
+            'blonde': 'b58143',
+            'red': 'a55728',
+            'gray': 'c9c9c9',
+            'platinum': 'ecdcbf',
+            'blue': '4a90d9',
+            'pink': 'ff69b4',
+            'purple': '9b59b6'
+        };
+        if (selections.hairColor && hairColors[selections.hairColor]) {
+            params.push(`hairColor=${hairColors[selections.hairColor]}`);
+        }
+
+        // Eyes
+        if (selections.eyes) {
+            params.push(`eyes=${selections.eyes}`);
+        }
+
+        // Eyebrows  
+        const eyebrowTypes = {
+            'default': 'default',
+            'raised': 'raisedExcited',
+            'angry': 'angry',
+            'sad': 'sadConcerned',
+            'unibrow': 'unibrowNatural',
+            'upDown': 'upDown'
+        };
+        if (selections.eyebrows && eyebrowTypes[selections.eyebrows]) {
+            params.push(`eyebrows=${eyebrowTypes[selections.eyebrows]}`);
+        }
+
+        // Mouth
+        if (selections.mouth) {
+            params.push(`mouth=${selections.mouth}`);
+        }
+
+        // Facial hair
+        if (selections.facialHair) {
+            params.push(`facialHair=${selections.facialHair}`);
+        }
+
+        // Accessories
+        if (selections.accessories) {
+            params.push(`accessories=${selections.accessories}`);
+        }
+
+        // Clothes
+        if (selections.clothe) {
+            params.push(`clothing=${selections.clothe}`);
+        }
+
+        // Clothes color - hex without #
+        const clotheColors = {
+            'black': '262e33',
+            'blue01': '65c9ff',
+            'blue02': '5199e4',
+            'gray01': '929598',
+            'red': 'ff5c5c',
+            'pink': 'ffafb9',
+            'pastelBlue': 'b1e2ff',
+            'pastelYellow': 'ffffb1'
+        };
+        if (selections.clotheColor && clotheColors[selections.clotheColor]) {
+            params.push(`clothingColor=${clotheColors[selections.clotheColor]}`);
+        }
+
+        return `https://api.dicebear.com/7.x/avataaars/svg?${params.join('&')}`;
     };
 
     // Handle image upload
