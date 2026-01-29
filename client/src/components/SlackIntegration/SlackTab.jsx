@@ -7,7 +7,7 @@
  * 
  * Features:
  * - Quick Launch: Deep links to open Slack app directly
- * - Satellite Mode: Launches Slack in a "sidecar" popup window
+ * - Satellite Mode: Launches Slack in a "sidecar" popup window (User preference)
  * - Message Drafting: Persistent scratchpad for composing messages
  * - Webhook Integration: Send messages directly to a channel
  */
@@ -26,7 +26,6 @@ export default function SlackTab() {
     const webhookKey = `stackpad_slack_webhook_${workspaceId}`;
 
     // State declarations
-    const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const [draft, setDraft] = useState(() => localStorage.getItem(draftKey) || '');
     const [webhookUrl, setWebhookUrl] = useState(() => localStorage.getItem(webhookKey) || '');
     const [sendStatus, setSendStatus] = useState(null);
@@ -41,17 +40,6 @@ export default function SlackTab() {
     useEffect(() => {
         localStorage.setItem(webhookKey, webhookUrl);
     }, [webhookUrl, webhookKey]);
-
-    // Handle outside click to close drawer
-    useEffect(() => {
-        const handleClickOutside = (e) => {
-            if (isDrawerOpen && !e.target.closest('.slack-drawer') && !e.target.closest('.satellite-btn')) {
-                setIsDrawerOpen(false);
-            }
-        };
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, [isDrawerOpen]);
 
     const handleLaunchSlack = () => {
         window.location.href = 'slack://open';
@@ -181,52 +169,19 @@ export default function SlackTab() {
         }, 600);
     };
 
-    // Components for the drawer content to avoid duplication
-    const DrawerContent = () => (
-        <div className="drawer-inner">
-            <div className="drawer-header">
-                <h3>Slack Quick View</h3>
-                <button className="close-btn" onClick={() => setIsDrawerOpen(false)}>×</button>
-            </div>
+    const handleOpenSatellite = () => {
+        // Open a small popup window for Slack
+        const width = 400;
+        const height = 600;
+        const left = window.screen.width - width - 50;
+        const top = 100;
 
-            <div className="drawer-section">
-                <h4>📨 Message Drafter</h4>
-                <div className="textarea-wrapper">
-                    <textarea
-                        value={draft}
-                        onChange={(e) => setDraft(e.target.value)}
-                        placeholder="Type your message..."
-                        className="draft-textarea glass-input"
-                    />
-                    <div className="draft-footer-actions">
-                        <button className="copy-draft-btn" onClick={copyDraft} title="Copy">
-                            📋
-                        </button>
-                        {webhookUrl && (
-                            <button
-                                className={`send-btn ${sendStatus}`}
-                                onClick={handleSendToWebhook}
-                                disabled={!draft.trim() || sendStatus === 'sending'}
-                            >
-                                {sendStatus === 'sending' ? '...' :
-                                    sendStatus === 'success' ? '✓' :
-                                        sendStatus === 'error' ? '⚠' : '➤'}
-                            </button>
-                        )}
-                    </div>
-                </div>
-            </div>
-
-            <div className="drawer-section">
-                <h4>🔗 Quick Links</h4>
-                <div className="quick-links-list">
-                    <a href="slack://open" className="drawer-link">💬 DMs</a>
-                    <a href="slack://open" className="drawer-link">📢 Mentions</a>
-                    <a href="slack://open" className="drawer-link">💾 Saved</a>
-                </div>
-            </div>
-        </div>
-    );
+        window.open(
+            'slack://open',
+            'StackPadSlackSatellite',
+            `width=${width},height=${height},left=${left},top=${top},menubar=no,toolbar=no,location=no,status=no`
+        );
+    };
 
     return (
         <div className="slack-tab glass-card full-height">
@@ -247,11 +202,11 @@ export default function SlackTab() {
                         🚀 App
                     </button>
                     <button
-                        className={`glass-button satellite-btn ${isDrawerOpen ? 'active' : ''}`}
-                        onClick={() => setIsDrawerOpen(!isDrawerOpen)}
-                        title="Toggle Sidebar Drawer"
+                        className="glass-button satellite-btn"
+                        onClick={handleOpenSatellite}
+                        title="Launch Satellite Window"
                     >
-                        📱 Toggle Sidebar
+                        📡 Satellite Mode
                     </button>
                     <button
                         className={`glass-button icon-only ${showSettings ? 'active' : ''}`}
@@ -350,11 +305,6 @@ export default function SlackTab() {
                         </div>
                     </div>
                 </div>
-            </div>
-
-            {/* Sliding Drawer */}
-            <div className={`slack-drawer ${isDrawerOpen ? 'open' : ''}`}>
-                <DrawerContent />
             </div>
         </div>
     );
