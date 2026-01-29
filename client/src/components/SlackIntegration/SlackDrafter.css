@@ -1,0 +1,181 @@
+/* SlackDrafter Widget Styles */
+.slack-drafter {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1.25rem;
+    height: 100%;
+}
+
+.slack-drafter .drafter-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.slack-drafter .drafter-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.slack-drafter .slack-icon {
+    width: 24px;
+    height: 24px;
+}
+
+.slack-drafter h3 {
+    margin: 0;
+    font-size: 1rem;
+    background: linear-gradient(135deg, #E01E5A, #36C5F0, #2EB67D, #ECB22E);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.slack-drafter .auto-save {
+    font-size: 0.7rem;
+    color: var(--accent-green);
+    background: rgba(76, 175, 80, 0.1);
+    padding: 3px 8px;
+    border-radius: 10px;
+}
+
+/* Tone Button Row */
+.slack-drafter .tone-row {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.slack-drafter .tone-chip {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 1px solid var(--glass-border);
+    background: rgba(255, 255, 255, 0.05);
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.slack-drafter .tone-chip:hover:not(:disabled) {
+    transform: scale(1.1);
+}
+
+.slack-drafter .tone-chip:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.slack-drafter .tone-chip.professional {
+    border-color: rgba(59, 130, 246, 0.5);
+    background: rgba(59, 130, 246, 0.1);
+}
+
+.slack-drafter .tone-chip.professional:hover:not(:disabled) {
+    background: rgba(59, 130, 246, 0.3);
+    box-shadow: 0 0 12px rgba(59, 130, 246, 0.4);
+}
+
+.slack-drafter .tone-chip.casual {
+    border-color: rgba(34, 197, 94, 0.5);
+    background: rgba(34, 197, 94, 0.1);
+}
+
+.slack-drafter .tone-chip.casual:hover:not(:disabled) {
+    background: rgba(34, 197, 94, 0.3);
+    box-shadow: 0 0 12px rgba(34, 197, 94, 0.4);
+}
+
+.slack-drafter .tone-chip.sales {
+    border-color: rgba(249, 115, 22, 0.5);
+    background: rgba(249, 115, 22, 0.1);
+}
+
+.slack-drafter .tone-chip.sales:hover:not(:disabled) {
+    background: rgba(249, 115, 22, 0.3);
+    box-shadow: 0 0 12px rgba(249, 115, 22, 0.4);
+}
+
+.slack-drafter .tone-chip.friendly {
+    border-color: rgba(236, 72, 153, 0.5);
+    background: rgba(236, 72, 153, 0.1);
+}
+
+.slack-drafter .tone-chip.friendly:hover:not(:disabled) {
+    background: rgba(236, 72, 153, 0.3);
+    box-shadow: 0 0 12px rgba(236, 72, 153, 0.4);
+}
+
+.slack-drafter .transforming-mini {
+    animation: pulse 0.8s infinite;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.4;
+    }
+}
+
+/* Textarea */
+.slack-drafter .draft-input {
+    flex: 1;
+    min-height: 100px;
+    resize: none;
+    padding: 0.75rem;
+    font-family: inherit;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    border-radius: 10px;
+}
+
+/* Footer Actions */
+.slack-drafter .drafter-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+}
+
+.slack-drafter .action-btn {
+    padding: 0.4rem 0.75rem;
+    border-radius: 8px;
+    border: 1px solid var(--glass-border);
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-primary);
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.slack-drafter .action-btn:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.slack-drafter .action-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.slack-drafter .action-btn.copy {
+    background: var(--accent-primary);
+    border-color: var(--accent-primary);
+}
+
+.slack-drafter .action-btn.copy:hover:not(:disabled) {
+    background: var(--accent-secondary);
+}
+
+.slack-drafter .action-btn.clear:hover:not(:disabled) {
+    background: rgba(239, 68, 68, 0.2);
+    border-color: rgba(239, 68, 68, 0.5);
+}

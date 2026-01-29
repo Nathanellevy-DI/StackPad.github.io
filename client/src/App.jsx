@@ -39,6 +39,7 @@ import ProgressStats from './components/ProgressStats/ProgressStats'; // Weekly 
 import TodoList from './components/TodoList/TodoList';               // Task management
 import MusicPlayer from './components/MusicPlayer/MusicPlayer';       // YouTube music player
 import SlackTab from './components/SlackIntegration/SlackTab';         // Slack Integration Hub
+import SlackDrafter from './components/SlackIntegration/SlackDrafter'; // Slack Drafter Widget
 import InstallPrompt from './components/InstallPrompt/InstallPrompt';  // PWA Install Banner
 
 import './App.css'; // Layout and container styles
@@ -104,7 +105,7 @@ function Dashboard() {
       default:
         return (
           <div className="dashboard-grid">
-            {/* Dashboard shows 4 widgets in a grid layout */}
+            {/* Dashboard shows widgets in a grid layout */}
             <div className="dashboard-section timer-section">
               <ZenTimer />
             </div>
@@ -114,8 +115,8 @@ function Dashboard() {
             <div className="dashboard-section logs-section">
               <SystemLogs />
             </div>
-            <div className="dashboard-section stickies-section">
-              <StickyNotes />
+            <div className="dashboard-section slack-section">
+              <SlackDrafter />
             </div>
           </div>
         );
